@@ -45,7 +45,7 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     cc2     <- MASS::ginv(t(GGalpha)%*%GGalpha + MASS::ginv(prior_alpha_cov))
     mujj    <- cc2 %*% cc1
     sijj    <- pracma::sqrtm(cc2)$B
-    alpha   <- mujj + sijj%*%rnorm(ncol(GGalpha))
+    alpha   <- mujj + sijj%*%pracma::randn(ncol(GGalpha),1)
     ###########################################################################
     # Update W1 and W2
     ###########################################################################
