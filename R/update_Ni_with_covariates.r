@@ -21,8 +21,8 @@ Ni      <- matrix(0,n,1)
 #genww1  = gen_truncated_normals(-alpha,-alpha .* ones(n,1),50);
 #genww2  = gen_truncated_normals(alpha,-alpha .* ones(n,1),50);
 kk <- GGalpha %*% alpha#ab 3/11
-genww1  <- gen_truncated_normals_never(-kk,-kk * ones(n,1),50)#ab 3/11
-genww2  <- gen_truncated_normals_never(kk,-kk * ones(n,1),50)#ab 3/11
+genww1  <- gen_truncated_normals_never(-kk,-kk * pracma::ones(n,1),50)#ab 3/11
+genww2  <- gen_truncated_normals_never(kk,-kk * pracma::ones(n,1),50)#ab 3/11
 rri     <- as.numeric(pracma::randn(n,1) < ppi)
 Ni      <- GGalpha %*% alpha + (didconsume * genww1) +
           ((1-didconsume) * (((1-rri) * genww1) - (rri * genww2)))
