@@ -411,7 +411,7 @@ neverConsumers = function(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_foo
   ###########################################################################
   # Set starting values for the Utildei
   ###########################################################################
-  set.seed(71094)
+  #set.seed(71094)
   print('check 4')
   Utildei <- pracma::randn(n,ncol(Sigmau)) %*% pracma::sqrtm(Sigmau)$B
   ###########################################################################
@@ -423,7 +423,7 @@ neverConsumers = function(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_foo
   WtildeiS[ ,3, ]  <- Wi3
   
   WtildeiS[ ,1, ]  <- abs(pracma::repmat(Xtildei[ , ,1] %*% beta[ ,1] + Utildei[ ,1], 1,mmi)
-                          + matrix(rnorm(n*mmi),n,mmi))
+                          + pracma::randn(n,mmi))
   WtildeiS[ ,1, ]  <- (WtildeiS[ ,1, ]* Wistar) - (WtildeiS[ ,1, ]* (1 - Wistar))
   Wtildei          <- WtildeiS
   numgen           <- 20
