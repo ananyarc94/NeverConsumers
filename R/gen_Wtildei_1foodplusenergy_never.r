@@ -53,7 +53,7 @@ for (kk      in 1:mmi){# This is the replicate #ab 3/5/11
     }
     mu      <- C2 * C1
     sigma   <- sqrt(C2)
-    Wtildeinew[ ,varnum,kk] <- mu + (sigma * rnorm(n))
+    Wtildeinew[ ,varnum,kk] <- mu + (sigma * pracma::randn(n,1))
 }
 
  Wtildeinew[ ,varnum, ] <- ((Wtildei[ ,varnum, ]) * Wistar)
