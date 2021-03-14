@@ -26,10 +26,10 @@ alpha  <- (trunc_value + sqrt(4 + (trunc_value ^ 2))) / 2
 thesign <- as.numeric(trunc_value >= 0)# Whether the truncation point
                               # is positive
 genww  <- trunc_value * as.numeric(trunc_value > 0)
-temp2  <- runif(n,-1,1)
+temp2  <- pracma::randn(n,1)
 for (jj in 1:numgen){
-    xicand <- trunc_value - ( (1 / alpha) * log(runif(n,0.1,1)))
-    mmmm   <- (runif(n,-1,1) < exp(-.5 * ( (xicand - alpha) ^ 2)))
+    xicand <- trunc_value - ( (1 / alpha) * log(pracma::rand(n,1)))
+    mmmm   <- (pracma::randn(n,1) < exp(-.5 * ( (xicand - alpha) ^ 2)))
     temp1  <- (xicand  * as.numeric(mmmm == 1)) + (genww * as.numeric(mmmm == 0))
     ssss   <- runif(n,-1,1)
     temp2  <- (temp2 * as.numeric(ssss < trunc_value)) +
