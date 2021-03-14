@@ -29,11 +29,17 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     ###########################################################################
     # Update Ni. You create this for everyone.
     ###########################################################################
+    # update_Ni<- update_Ni_with_covariates(Xtildei,beta,Utildei,alpha,
+    #                                         GGalpha,n,mmi,didconsume)
+    # Ni       <- update_Ni$Ni
+    # ppi      <- update_Ni$ppi
+    # isnever  <- as.numeric(Ni < 0)# Indicator of a never-consumer
+    
     update_Ni<- update_Ni_with_covariates(Xtildei,beta,Utildei,alpha,
-                                            GGalpha,n,mmi,didconsume)
+                                          GGalpha,n,mmi,didconsume)
     Ni       <- update_Ni$Ni
     ppi      <- update_Ni$ppi
-    isnever  <- as.numeric(Ni < 0)# Indicator of a never-consumer
+    isnever  <- as.numeric(Ni < 0)
     ###########################################################################
     # Update alpha. In the following, the complete con, ditional for alpha is
     # that is a truncated normal from the left at alpha_min, but with mean (cc2
@@ -51,7 +57,7 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     ###########################################################################
     numgen     <- 5
     Wtildeinew <- gen_Wtildei_1foodplusenergy_never(Wtildei,beta,Xtildei,Utildei,n,
-                                                      iSigmae,Wistar,mmi,numgen)
+                                                    iSigmae,Wistar,mmi,numgen)
     Wtildei    <- Wtildeinew
     
     ###########################################################################
@@ -106,7 +112,7 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     # are never consumers, i.e., Ni < 0, have their values updated by a
     # Metropolis step.
     ###########################################################################
-    Utildei_new<- update_Utildei(Utildei,beta,Wtildei,iSigmae,
+    Utildei_new<- update_Utildei_c(Utildei,beta,Wtildei,iSigmae,
                                  Ni,isnever,didconsume,Xtildei,mmi,iSigmau,n)
     Utildei     <- Utildei_new
     ###########################################################################
