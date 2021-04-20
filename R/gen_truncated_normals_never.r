@@ -29,16 +29,16 @@ genww  <- trunc_value * as.numeric(trunc_value > 0)
 temp2  <- pracma::randn(n,1)
 for (jj in 1:numgen){
     xicand <- trunc_value - ( (1 / alpha) * log(pracma::rand(n,1)))
-    mmmm   <- (pracma::randn(n,1) < exp(-.5 * ( (xicand - alpha) ^ 2)))
+    mmmm   <- as.numeric(pracma::rand(n,1) < exp(-.5 * ( (xicand - alpha) ^ 2)))
     temp1  <- (xicand  * as.numeric(mmmm == 1)) + (genww * as.numeric(mmmm == 0))
-    ssss   <- runif(n,-1,1)
+    ssss   <- pracma::randn(n,1)
     temp2  <- (temp2 * as.numeric(ssss < trunc_value)) +
                (ssss * as.numeric(ssss >= trunc_value))
     genww  <- (temp2 * as.numeric(thesign == 0)) + (temp1 *
                                                     as.numeric(thesign == 1))
 }
-genww  <- (genww * (genww > trunc_value)) + ((trunc_value + eps)
-                             *(genww <= trunc_value))
+genww  <- (genww * as.numeric(genww > trunc_value)) + ((trunc_value + eps)
+                             *as.numeric(genww <= trunc_value))
 return(genww)
 }
 

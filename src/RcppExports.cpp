@@ -19,7 +19,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // gen_truncated_normals_never_c
-arma::mat gen_truncated_normals_never_c(const arma::vec& trunc_value, const arma::mat& startxi, double numgen);
+arma::vec gen_truncated_normals_never_c(const arma::vec& trunc_value, const arma::mat& startxi, double numgen);
 RcppExport SEXP _NeverConsumersR_gen_truncated_normals_never_c(SEXP trunc_valueSEXP, SEXP startxiSEXP, SEXP numgenSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -188,6 +188,82 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// update_beta1_with_prior_mean_random_walk_c
+arma::colvec update_beta1_with_prior_mean_random_walk_c(const arma::cube& Xtildei, const double mmi, const arma::mat& prior_beta_mean, const arma::cube prior_beta_cov, const arma::mat& beta, const arma::cube& Wtildei, const arma::mat& Utildei, const arma::mat& iSigmae, const arma::vec& isnever, const double update_beta1_var_ind);
+RcppExport SEXP _NeverConsumersR_update_beta1_with_prior_mean_random_walk_c(SEXP XtildeiSEXP, SEXP mmiSEXP, SEXP prior_beta_meanSEXP, SEXP prior_beta_covSEXP, SEXP betaSEXP, SEXP WtildeiSEXP, SEXP UtildeiSEXP, SEXP iSigmaeSEXP, SEXP isneverSEXP, SEXP update_beta1_var_indSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::cube& >::type Xtildei(XtildeiSEXP);
+    Rcpp::traits::input_parameter< const double >::type mmi(mmiSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type prior_beta_mean(prior_beta_meanSEXP);
+    Rcpp::traits::input_parameter< const arma::cube >::type prior_beta_cov(prior_beta_covSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type Wtildei(WtildeiSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Utildei(UtildeiSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type iSigmae(iSigmaeSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type isnever(isneverSEXP);
+    Rcpp::traits::input_parameter< const double >::type update_beta1_var_ind(update_beta1_var_indSEXP);
+    rcpp_result_gen = Rcpp::wrap(update_beta1_with_prior_mean_random_walk_c(Xtildei, mmi, prior_beta_mean, prior_beta_cov, beta, Wtildei, Utildei, iSigmae, isnever, update_beta1_var_ind));
+    return rcpp_result_gen;
+END_RCPP
+}
+// update_beta1_with_prior_mean_c
+arma::colvec update_beta1_with_prior_mean_c(const arma::cube& Xtildei, const double mmi, const arma::mat& prior_beta_mean, const arma::cube prior_beta_cov, const arma::mat& beta, const arma::cube& Wtildei, const arma::mat& Utildei, const arma::mat& iSigmae, const arma::colvec& isnever, const double update_beta1_var_ind);
+RcppExport SEXP _NeverConsumersR_update_beta1_with_prior_mean_c(SEXP XtildeiSEXP, SEXP mmiSEXP, SEXP prior_beta_meanSEXP, SEXP prior_beta_covSEXP, SEXP betaSEXP, SEXP WtildeiSEXP, SEXP UtildeiSEXP, SEXP iSigmaeSEXP, SEXP isneverSEXP, SEXP update_beta1_var_indSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::cube& >::type Xtildei(XtildeiSEXP);
+    Rcpp::traits::input_parameter< const double >::type mmi(mmiSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type prior_beta_mean(prior_beta_meanSEXP);
+    Rcpp::traits::input_parameter< const arma::cube >::type prior_beta_cov(prior_beta_covSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type Wtildei(WtildeiSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Utildei(UtildeiSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type iSigmae(iSigmaeSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type isnever(isneverSEXP);
+    Rcpp::traits::input_parameter< const double >::type update_beta1_var_ind(update_beta1_var_indSEXP);
+    rcpp_result_gen = Rcpp::wrap(update_beta1_with_prior_mean_c(Xtildei, mmi, prior_beta_mean, prior_beta_cov, beta, Wtildei, Utildei, iSigmae, isnever, update_beta1_var_ind));
+    return rcpp_result_gen;
+END_RCPP
+}
+// update_beta2_with_prior_mean_c
+arma::colvec update_beta2_with_prior_mean_c(const arma::cube& Xtildei, const double mmi, const arma::mat& prior_beta_mean, const arma::cube prior_beta_cov, const arma::mat& beta, const arma::cube& Wtildei, const arma::mat& Utildei, const arma::mat& iSigmae);
+RcppExport SEXP _NeverConsumersR_update_beta2_with_prior_mean_c(SEXP XtildeiSEXP, SEXP mmiSEXP, SEXP prior_beta_meanSEXP, SEXP prior_beta_covSEXP, SEXP betaSEXP, SEXP WtildeiSEXP, SEXP UtildeiSEXP, SEXP iSigmaeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::cube& >::type Xtildei(XtildeiSEXP);
+    Rcpp::traits::input_parameter< const double >::type mmi(mmiSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type prior_beta_mean(prior_beta_meanSEXP);
+    Rcpp::traits::input_parameter< const arma::cube >::type prior_beta_cov(prior_beta_covSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type Wtildei(WtildeiSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Utildei(UtildeiSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type iSigmae(iSigmaeSEXP);
+    rcpp_result_gen = Rcpp::wrap(update_beta2_with_prior_mean_c(Xtildei, mmi, prior_beta_mean, prior_beta_cov, beta, Wtildei, Utildei, iSigmae));
+    return rcpp_result_gen;
+END_RCPP
+}
+// update_beta3_with_prior_mean_c
+arma::colvec update_beta3_with_prior_mean_c(const arma::cube& Xtildei, const double mmi, const arma::mat& prior_beta_mean, const arma::cube prior_beta_cov, const arma::mat& beta, const arma::cube& Wtildei, const arma::mat& Utildei, const arma::mat& iSigmae);
+RcppExport SEXP _NeverConsumersR_update_beta3_with_prior_mean_c(SEXP XtildeiSEXP, SEXP mmiSEXP, SEXP prior_beta_meanSEXP, SEXP prior_beta_covSEXP, SEXP betaSEXP, SEXP WtildeiSEXP, SEXP UtildeiSEXP, SEXP iSigmaeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::cube& >::type Xtildei(XtildeiSEXP);
+    Rcpp::traits::input_parameter< const double >::type mmi(mmiSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type prior_beta_mean(prior_beta_meanSEXP);
+    Rcpp::traits::input_parameter< const arma::cube >::type prior_beta_cov(prior_beta_covSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type Wtildei(WtildeiSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Utildei(UtildeiSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type iSigmae(iSigmaeSEXP);
+    rcpp_result_gen = Rcpp::wrap(update_beta3_with_prior_mean_c(Xtildei, mmi, prior_beta_mean, prior_beta_cov, beta, Wtildei, Utildei, iSigmae));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpparma_hello_world
 arma::mat rcpparma_hello_world();
 RcppExport SEXP _NeverConsumersR_rcpparma_hello_world() {
@@ -244,6 +320,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NeverConsumersR_updated_parameter_theta_never_c", (DL_FUNC) &_NeverConsumersR_updated_parameter_theta_never_c, 6},
     {"_NeverConsumersR_update_iSigmau_c", (DL_FUNC) &_NeverConsumersR_update_iSigmau_c, 6},
     {"_NeverConsumersR_update_Utildei_c", (DL_FUNC) &_NeverConsumersR_update_Utildei_c, 11},
+    {"_NeverConsumersR_update_beta1_with_prior_mean_random_walk_c", (DL_FUNC) &_NeverConsumersR_update_beta1_with_prior_mean_random_walk_c, 10},
+    {"_NeverConsumersR_update_beta1_with_prior_mean_c", (DL_FUNC) &_NeverConsumersR_update_beta1_with_prior_mean_c, 10},
+    {"_NeverConsumersR_update_beta2_with_prior_mean_c", (DL_FUNC) &_NeverConsumersR_update_beta2_with_prior_mean_c, 8},
+    {"_NeverConsumersR_update_beta3_with_prior_mean_c", (DL_FUNC) &_NeverConsumersR_update_beta3_with_prior_mean_c, 8},
     {"_NeverConsumersR_rcpparma_hello_world", (DL_FUNC) &_NeverConsumersR_rcpparma_hello_world, 0},
     {"_NeverConsumersR_rcpparma_outerproduct", (DL_FUNC) &_NeverConsumersR_rcpparma_outerproduct, 1},
     {"_NeverConsumersR_rcpparma_innerproduct", (DL_FUNC) &_NeverConsumersR_rcpparma_innerproduct, 1},

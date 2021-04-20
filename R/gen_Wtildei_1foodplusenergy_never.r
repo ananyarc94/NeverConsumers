@@ -30,8 +30,8 @@ for (kk      in 1:mmi){# This is the replicate #ab 3/5/11
     mu      <- C2 * C1
     sigma   <- sqrt(C2)
     startxi <- mu/sigma
-    genww1  <- gen_truncated_normals_never_c(-mu/sigma,-startxi,numgen)
-    genww2  <- gen_truncated_normals_never_c(mu/sigma,-startxi,numgen)
+    genww1  <- gen_truncated_normals_never(-mu/sigma,-startxi,numgen)
+    genww2  <- gen_truncated_normals_never(mu/sigma,-startxi,numgen)
     Wtildeinew[ ,varnum,kk] <- mu + (sigma * ((Wistar[ ,kk]* genww1)
                     - ((1 - Wistar[ ,kk]) * genww2)))
 }

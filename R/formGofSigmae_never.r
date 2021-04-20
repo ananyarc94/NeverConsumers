@@ -12,7 +12,7 @@ formGofSigmae_never <- function(r,theta,s22,s33,qq,mmi){
   
   A <- diag(c(1, sqrt(s22), sqrt(s33)))
   Sigmae       <- A %*% R %*% A
-  iSigmae      <- MASS::ginv(Sigmae)
+  iSigmae      <- pracma::inv(Sigmae)
   
 
 tempMat <- matrix(0,ncol(qq),ncol(qq))

@@ -13,31 +13,40 @@ thetamax      <- max(thetapossible, theta)
 spacing       <- thetapossible[2] - thetapossible[1]
 thetacurr     <- theta
 if (thetacurr <= thetamin){
-    ss        <- pracma::randn(1,1)
+    i = 1
+    ss        <- pracma::rand(1,1)
     thetacand <- (thetacurr * as.numeric(ss <= 0.33)) + ((thetacurr + spacing)
                 * as.numeric(ss > 0.33) * as.numeric(ss <= 0.66)) +
                 + ((thetacurr + (2 * spacing)) * as.numeric(ss > 0.66))
+    #print(paste("this is ss:", ss,"when thetacurr = ",thetacurr,"and thetacand = ",thetacand,"and spacing = ",spacing," and i = ", i))
+    
 }
-if (thetacurr >= thetamax){
-    ss        <- pracma::randn(1,1)
+else if(thetacurr >= thetamax){
+    i = 2
+    ss        <- pracma::rand(1,1)
     thetacand <- (thetacurr * as.numeric(ss <= 0.33)) + ((thetacurr - spacing)
                 * as.numeric(ss > 0.33) * as.numeric(ss <= 0.66)) +
                 + ((thetacurr - (2 * spacing)) * as.numeric(ss > 0.66))
+    #print(paste("this is ss:", ss,"when thetacurr = ",thetacurr,"and thetacand = ",thetacand,"and spacing = ",spacing," and i = ", i))
+    
 }
-if (thetacurr  > thetamin){
+else if(thetacurr  > thetamin){
     if (thetacurr < thetamax){
-    ss        <- pracma::randn(1,1)
+        i = 3
+    ss        <- pracma::rand(1,1)
     thetacand <- (thetacurr * as.numeric(ss <= 0.33)) + ((thetacurr + spacing)
                 * as.numeric(ss > 0.33) * as.numeric(ss <= 0.66)) +
                 + ((thetacurr - spacing) * as.numeric(ss > 0.66))
+    #print(paste("this is ss:", ss,"when thetacurr = ",thetacurr,"and thetacand = ",thetacand,"and spacing = ",spacing," and i = ", i))
+    
     }
+    
 }
 GofSigmaecurr = formGofSigmae_never(r,thetacurr,s22,s33,qq,mmi)
 GofSigmaecand = formGofSigmae_never(r,thetacand,s22,s33,qq,mmi)
 
 gg            <- min(1, exp(GofSigmaecand - GofSigmaecurr))
-ss            <- pracma::randn(1,1)
+ss            <- pracma::rand(1,1)
 thetanew      <- (thetacand * as.numeric(ss < gg)) + (thetacurr * as.numeric(ss > gg))
-thetanew      <- ifelse(thetanew > 1.2, 1, thetanew)
 return(thetanew)
 }

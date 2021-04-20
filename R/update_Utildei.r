@@ -38,14 +38,14 @@ for( i in 1:mmi){
 ss <- Wtildei - y
 
 
-c1  <- (iSigmae%*% t(rowSums(ss, dim = 2))) 
-c2  <- MASS::ginv(iSigmau + (mmi * iSigmae))
+c1  <- t(iSigmae%*% t(rowSums(ss, dims = 2))) 
+c2  <- pracma::inv(iSigmau + (mmi * iSigmae))
 #c2  = (c2+ c2')./2;
 # Here is Step 2
 isnever <- (Ni < 0)
 
-Utildei <- t(c2 %*% (c1)) + (pracma::randn(n,3)  %*% pracma::sqrtm(c2)$B)
-c2_cand <- 1 / ( (1 - pnorm(qq[ ,1] + Utildei[ ,1])) ^ mmi)
+Utildei <- t(c2 %*% t(c1)) + (pracma::randn(n,3)  %*% pracma::sqrtm(c2)$B)
+c2_cand <- 1 / ((1 - pnorm(qq[ ,1] + Utildei[ ,1])) ^ mmi)
 c2_curr <- 1 / ( (1 - pnorm(qq[ ,1] + Utildei_Current[ ,1])) ^ mmi)
 rri     <- (pracma::rand(n,1) < (c2_cand / c2_curr))
 ddff       <- pracma::size(Utildei,2)

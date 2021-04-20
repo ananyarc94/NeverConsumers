@@ -1,7 +1,8 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
+#include<stdio.h>
 using namespace Rcpp;
-using namespace sugar;
+using namespace std;
 
 // [[Rcpp::export]]
 /*
@@ -17,57 +18,71 @@ double mod(double a, int n)
 
 
 // [[Rcpp::export]]
-arma::mat gen_truncated_normals_never_c(const arma::vec& trunc_value, const arma::mat& startxi,double numgen){
+arma::vec gen_truncated_normals_never_c(const arma::vec& trunc_value, const arma::mat& startxi,double numgen){
   
   // calling exp()
-  Function f("exp");   
+  //Function f("exp");   
   
-  arma::mat a(2,2);
-  a.zeros();
-  double  eps    = 2.2204*exp(-16);
-  double  n      = trunc_value.n_elem;
-  arma::mat alpha  = (trunc_value + arma::sqrt(4 + arma::pow(trunc_value, 2))) / 2;
-  arma::vec aa(trunc_value.n_elem), thesign(trunc_value.n_elem);
+  // arma::mat a(2,2);
+  //   a.zeros();
+  unsigned long int i;
+  double  eps    = 2.2204*std::exp(-16);
+  int  n      = trunc_value.n_elem;
+  arma::vec alpha(n), aa(n), thesign(n);;
+  for(i = 0; i < n; i++) {
+    alpha(i)  = (trunc_value(i) + std::sqrt(4 + std::pow(trunc_value(i), 2))) / 2;
+    }
+  //arma::mat alpha  = (trunc_value + std::sqrt(4 + std::pow(trunc_value, 2))) / 2;
   
-  for(int i = 0; i< trunc_value.n_elem; i++){
+  
+  for(i = 0; i< n; i++){
     if(trunc_value(i) >= 0.0){
-      aa(i) = 1;
+      //aa(i) = 1;
       thesign(i) = 1;
     }else{
-      aa(i) = 0;
+      //aa(i) = 0;
       thesign(i) = 0;
     }
   }
   
-  arma::mat genww  = trunc_value % aa;
+  for(i = 0; i< n; i++){
+    if(trunc_value(i) > 0.0){
+      aa(i) = 1;
+      //thesign(i) = 1;
+    }else{
+      aa(i) = 0;
+      //thesign(i) = 0;
+    }
+  }
+  
+  arma::vec genww  = trunc_value % aa;
   arma::vec temp2  = arma::randn(n,1);
   arma::vec mmmm(n), kkkk(n), hhhh(n);
-  for(double jj = 1; jj<= numgen; jj++){
-    arma::mat xicand = trunc_value - ( (1 / alpha) % log(arma::randu(n,1)));
-    arma::vec gg = exp(-.5 * arma::pow( (xicand - alpha), 2));
-    arma::vec ss = arma::randu(n,1);
+  for(int jj = 1; jj<= numgen; jj++){
+    arma::vec xicand = trunc_value - ( (1 / alpha) % log(arma::randu(n,1)));
+    arma::vec gg = exp(-0.5 * arma::pow( (xicand - alpha), 2));
+    arma::vec ss = arma::randn(n,1);
     
-    for(int i=0; i<n; i++){
+    for(i=0; i<n; i++){
       if( ss(i) < gg(i)){
         mmmm(i) = 1;
       }else{
         mmmm(i) = 0;
       }}
     
-    arma::mat temp1  = (xicand % mmmm) + (genww % (1 - mmmm));
+    arma::vec temp1  = (xicand % mmmm) + (genww % (1 - mmmm));
     arma::vec ssss   = arma::randn(n,1);
     
-    for(int i=0; i<n; i++){
-      if( ssss(i) < trunc_value(i, 0)){
+    for(i=0; i<n; i++){
+      if( ssss(i) < trunc_value(i)){
         kkkk(i) = 1;
       }else{
         kkkk(i) = 0;
       }}
-    temp2  = (temp2 % kkkk) +
-      (ssss % (1 - kkkk));
+    temp2  = (temp2 % kkkk) +       (ssss % (1 - kkkk));
     genww  = (temp2 % thesign) + (temp1 % (1 - thesign ));
   }
-  for(int i=0; i<n; i++){
+  for(i=0; i<n; i++){
     if( genww(i) > trunc_value(i)){
       hhhh(i) = 1;
     }else{
@@ -83,23 +98,23 @@ arma::mat gen_truncated_normals_never_c(const arma::vec& trunc_value, const arma
 // [[Rcpp::export]]
 Rcpp::List update_Ni_with_covariates_c(const arma::cube& Xtildei,const arma::mat& beta,const arma::mat& Utildei,const arma::vec& alpha,const arma::mat& GGalpha,const double n,const double mmi,const arma::vec& didconsume){
 
-  arma::mat  tt = (Xtildei.slice(1) * beta.col(1)) + Utildei.col(1) ;
+  arma::vec  tt = (Xtildei.slice(1) * beta.col(1)) + Utildei.col(1) ;
   arma::vec aq1 = arma::normcdf(tt,0,1);
   arma::vec aq2 = arma::normcdf(GGalpha*alpha,0,1);
   arma::vec cc1 = aq2 % arma::pow((1 - aq1), mmi) / (1 - aq2);
   arma::vec ppi = 1 / (1 + cc1);
-  arma::mat   Ni      = arma::zeros(n,1);
-  arma::mat kk = GGalpha*alpha;
-  arma::mat genww1  = gen_truncated_normals_never_c(-kk,-kk % arma::ones(n,1),50.0);
-  arma::mat genww2  = gen_truncated_normals_never_c(kk,-kk % arma::ones(n,1),50.0);
+  arma::vec   Ni      = arma::zeros(n,1);
+  arma::vec kk = GGalpha*alpha;
+  arma::vec genww1  = gen_truncated_normals_never_c(-kk,-kk % arma::ones(n,1),50.0);
+  arma::vec genww2  = gen_truncated_normals_never_c(kk,-kk % arma::ones(n,1),50.0);
 
   arma::vec uu = arma::randu(n,1);
   arma::vec rri(n);
   for(int i=0; i< n; i++){
-    if(uu[i] < ppi[i]){
-      rri[i] = 1;
+    if(uu(i) < ppi(i)){
+      rri(i) = 1;
     }else{
-      rri[i] = 0;
+      rri(i) = 0;
     }
 
   }
@@ -524,194 +539,194 @@ arma::mat update_Utildei_c(arma::mat& Utildei,const arma::mat& beta,
 }
 
 
-// // [[Rcpp::export]]
-// arma::colvec update_beta1_with_prior_mean_random_walk_c(const arma::cube& Xtildei, const double mmi, const arma::mat& prior_beta_mean,
-//                                                         const arma::cube prior_beta_cov, const arma::mat& beta, const arma::cube& Wtildei, const arma::mat& Utildei,
-//                                                         const arma::mat& iSigmae, const arma::vec& isnever, const double update_beta1_var_ind){
-//   
-//   arma::mat xx         = Xtildei.slice(0);
-//   arma::mat cc2        = inv(inv(prior_beta_cov.slice(0)) + (mmi * iSigmae(0,0) * (xx.t() * xx)));
-//   double mmbeta        = beta.n_rows;
-//   arma::mat cc1        = arma::zeros(mmbeta,1);
-//   cc1        = cc1 + (inv(prior_beta_cov.slice(0)) * prior_beta_mean.col(0)); 
-//   for( int jji=0; jji< mmi; jji ++){
-//     arma::mat w = Wtildei.slice(jji);  
-//     cc1    = cc1 + (iSigmae(0,0)*(xx.t() * (w.col(0) - Utildei.col(0))));
-//     cc1    = cc1 + (iSigmae(0,1)*(xx.t() * (w.col(1) - Utildei.col(1))));
-//     cc1    = cc1 + (iSigmae(0,2)*(xx.t() * (w.col(2) - Utildei.col(2))));
-//   }
-//   
-//   arma::vec beta1_curr = beta.col(0);
-//   cc2 = (cc2 + cc2.t())/2;
-//   std::cout<<"C2 beta1"<<std::endl;
-//   std::cout<<cc2<<std::endl;
-//   arma::mat t = arma::sqrtmat_sympd(cc2/update_beta1_var_ind);  
-//   arma::vec beta1_cand = beta1_curr + (t * arma::randn(mmbeta,1));
-//   double n = xx.n_rows;  
-//   arma::vec  v = arma::ones(n);
-//   double lc2_cand   = -mmi * sum(arma::find_finite(isnever % log((v - arma::normcdf((xx * beta1_cand) + Utildei.col(0))))));
-//   double lc2_curr   = -mmi * sum(arma::find_finite(isnever % log((v - arma::normcdf((xx * beta1_curr) + Utildei.col(0))))));
-//   
-//   arma::mat lc1_cand   = cc1.t() * beta1_cand - beta1_cand.t() * inv(cc2) * beta1_cand /2; 
-//   arma::mat lc1_curr   = cc1.t() * beta1_curr - beta1_curr.t() * inv(cc2) * beta1_curr /2; 
-//   
-//   arma::mat A(1,1);  
-//   A.ones();                              
-//   arma::mat gghh       = arma::min(A ,exp( lc1_cand + lc2_cand - lc1_curr - lc2_curr));
-//   
-//   arma::mat ss(1,1); 
-//   ss(0,0)            = arma::randu<double>();
-//   double rri;
-//   if(ss(0,0) < gghh(0,0)){
-//     rri = 1;
-//   }                                 
-//   
-//   arma::vec beta1      = (beta1_cand * rri) + (beta1_curr * (1 - rri));
-//   
-//   return(beta1); 
-//   
-// }
-// 
-// 
-// // [[Rcpp::export]]
-// arma::colvec update_beta1_with_prior_mean_c(const arma::cube& Xtildei, const double mmi, const arma::mat& prior_beta_mean,
-//                                             const arma::cube prior_beta_cov, const arma::mat& beta, const arma::cube& Wtildei, const arma::mat& Utildei,
-//                                             const arma::mat& iSigmae, const arma::colvec& isnever, const double update_beta1_var_ind){
-//   
-//   // # This program updated beta1 using  Metropolis step. It also uses the fact
-//   // # that the design matrix for the food is the same for every repeat. This
-//   // # code would have to be changed is this were not true.
-//   // #
-//   // # Input
-//   // # Xtildei        = design matrix
-//   // # mmi            = # of recalls (assumed same for all)
-//   // # cov_prior_beta = the prior covariance matrix for beta1
-//   // # beta           = the current values of all the betas
-//   // # Wtildei        = the latent and non-latent responses
-//   // # Utildei        = the latent person-specific effects
-//   // # iSigmae        = the 2x2 inverse of Sigmae. iSigmae(1,1) = 1
-//   arma::mat xx         = Xtildei.slice(0);
-//   arma::mat cc2        = arma::inv(arma::inv(prior_beta_cov.slice(0)) +
-//     (mmi * iSigmae(0,0) * (arma::trans(xx)* xx)));
-//   double mmbeta     = beta.n_rows;
-//   arma::mat cc1        = arma::zeros(mmbeta,1);
-//   cc1        = cc1 + (arma::inv(prior_beta_cov.slice(0)) * prior_beta_mean.col(0));
-//   for (int jji = 0; jji< mmi; jji++){
-//     arma::mat w = Wtildei.slice(jji);  
-//     cc1    = cc1 + (iSigmae(0,0)*(xx.t() * (w.col(0) - Utildei.col(0))));
-//     cc1    = cc1 + (iSigmae(0,1)*(xx.t() * (w.col(1) - Utildei.col(1))));
-//     cc1    = cc1 + (iSigmae(0,2)*(xx.t() * (w.col(2) - Utildei.col(2))));
-//   }
-//   //cc2 = (cc2 + cc2.t())/2;
-//   arma::mat t = arma::sqrtmat_sympd(cc2/update_beta1_var_ind);
-//   arma::vec beta1_cand = (cc2 * cc1) + (t* arma::randn(mmbeta,1));
-//   arma::vec  beta1_curr = beta.col(0);
-//   double n = xx.n_rows;  
-//   arma::vec  v = arma::ones(n);
-//   double lc2_cand   = -mmi * sum(arma::find_finite(isnever %log((1 - arma::normcdf((xx * beta1_cand) + Utildei.col(0))))));
-//   double lc2_curr   = -mmi * sum(arma::find_finite(isnever %
-//                                  log((1 - arma::normcdf((xx* beta1_curr) + Utildei.col(0))))));
-//   arma::mat lc1_cand   = cc1.t() * beta1_cand - beta1_cand.t() * inv(cc2) * beta1_cand /2;
-//   arma::mat lc1_curr   = cc1.t() * beta1_curr - beta1_curr.t() * inv(cc2) * beta1_curr /2;
-//   
-//   arma::mat A(1,1);  
-//   A.ones();
-//   
-//   arma::mat gghh       = arma::min(A ,exp( (1-update_beta1_var_ind) *lc1_cand + lc2_cand
-//                                              - (1-update_beta1_var_ind) * lc1_curr - lc2_curr));
-//   
-//   arma::mat ss(1,1);
-//   ss(0,0)            = arma::randu<double>();
-//   double rri;
-//   if(ss(0,0) < gghh(0,0)){
-//     rri = 1;
-//   }
-//   arma::colvec beta1      = (beta1_cand * rri) + (beta1_curr * (1 - rri));
-//   
-//   return(beta1);
-//   
-// }
-// 
-// // [[Rcpp::export]]
-// arma::colvec update_beta2_with_prior_mean_c(const arma::cube& Xtildei, const double mmi, const arma::mat& prior_beta_mean,
-//                                             const arma::cube prior_beta_cov, const arma::mat& beta, const arma::cube& Wtildei, const arma::mat& Utildei,
-//                                             const arma::mat& iSigmae){
-//   
-//   // % This program updated beta2, and requires no Metropolis step. It also uses
-//   // % the fact that the design matrix for the food is the same for every
-//   // % repeat. This code would have to be changed is this were not true.
-//   // %
-//   // % There is another special feature about this problem, namely that since
-//   // % there is no energy, Sigmae is diagonal. This makes the step for beta2 a
-//   // % lot different.
-//   // %
-//   // % Input
-//   // % Xtildei        = design matrix
-//   // % mmi            = # of recalls (assumed same for all)
-//   // % cov_prior_beta = the prior covariance matrix for beta1
-//   // % beta           = the current values of all the betas
-//   // % Wtildei        = the latent and non-latent responses
-//   // % Utildei        = the latent person-specific effects
-//   // % iSigmae        = the 2x2 inverse of Sigmae. iSigmae(1,1) = 1
-//   
-//   arma::mat xx         = Xtildei.slice(0);
-//   arma::mat cc2        = inv(inv(prior_beta_cov.slice(0)) + (mmi * iSigmae(0,0) * (xx.t() * xx)));
-//   double mmbeta        = beta.n_rows;
-//   arma::mat cc1        = arma::zeros(mmbeta,1);
-//   cc1        = cc1 + (inv(prior_beta_cov.slice(1)) * prior_beta_mean.col(1)); 
-//   for( int jji=0; jji< mmi; jji ++){
-//     arma::mat w = Wtildei.slice(jji);  
-//     cc1    = cc1 + (iSigmae(1,1)*(xx.t() * (w.col(1) - Utildei.col(1))));
-//     cc1    = cc1 + (iSigmae(0,1)*(xx.t() * (w.col(0) - (xx * beta.col(0)) - Utildei.col(0))));
-//     cc1    = cc1 + (iSigmae(1,2)*(xx.t() * (w.col(2) - (xx * beta.col(2)) - Utildei.col(2))));
-//   }
-//   //cc2 = (cc2 + cc2.t())/2;
-//   arma::mat t = arma::sqrtmat_sympd(cc2);
-//   arma::colvec beta2      = (cc2 * cc1) + (t * arma::randn(mmbeta,1));
-//   return(beta2);
-// }  
-// 
-// // [[Rcpp::export]]
-// arma::colvec update_beta3_with_prior_mean_c(const arma::cube& Xtildei, const double mmi, const arma::mat& prior_beta_mean,
-//                                             const arma::cube prior_beta_cov, const arma::mat& beta, const arma::cube& Wtildei, const arma::mat& Utildei,
-//                                             const arma::mat& iSigmae){
-//   
-//   // # This program updated beta2, and requires no Metropolis step. It also uses
-//   // # the fact that the design matrix for the food is the same for every
-//   // # repeat. This code would have to be changed is this were not true.
-//   // #
-//   // # There is another special feature about this problem, namely that since
-//   // # there is no energy, Sigmae is diagonal. This makes the step for beta2 a
-//   // # lot different.
-//   // #
-//   // # Input
-//   // # Xtildei        = design matrix
-//   // # mmi            = # of recalls (assumed same for all)
-//   // # cov_prior_beta = the prior covariance matrix for beta1
-//   // # beta           = the current values of all the betas
-//   // # Wtildei        = the latent and non-latent responses
-//   // # Utildei        = the latent person-specific effects
-//   // # iSigmae        = the 2x2 inverse of Sigmae. iSigmae(1,1) = 1
-//   
-//   arma::mat xx         = Xtildei.slice(0);
-//   arma::mat cc2        = inv(inv(prior_beta_cov.slice(2)) + (mmi * iSigmae(2,2) * (xx.t() * xx)));
-//   double mmbeta        = beta.n_rows;
-//   arma::mat cc1        = arma::zeros(mmbeta,1);
-//   cc1        = cc1 + (inv(prior_beta_cov.slice(2)) * prior_beta_mean.col(2)); 
-//   for( int jji=0; jji< mmi; jji ++){
-//     arma::mat w = Wtildei.slice(jji);  
-//     cc1    = cc1 + (iSigmae(2,2)*(xx.t() * (w.col(2) - Utildei.col(2))));
-//     cc1    = cc1 + (iSigmae(0,2)*(xx.t() * (w.col(0) - (xx * beta.col(0)) - Utildei.col(0))));
-//     cc1    = cc1 + (iSigmae(1,2)*(xx.t() * (w.col(1) - (xx * beta.col(1)) - Utildei.col(1))));
-//   }
-//   //cc2 = (cc2 + cc2.t())/2;
-//   arma::mat t = arma::sqrtmat_sympd(cc2);
-//   arma::colvec beta3      = (cc2 * cc1) + (t * arma::randn(mmbeta,1));
-//   
-//   return(beta3);
-//   
-// }
-// 
+// [[Rcpp::export]]
+arma::colvec update_beta1_with_prior_mean_random_walk_c(const arma::cube& Xtildei, const double mmi, const arma::mat& prior_beta_mean,
+                                                        const arma::cube prior_beta_cov, const arma::mat& beta, const arma::cube& Wtildei, const arma::mat& Utildei,
+                                                        const arma::mat& iSigmae, const arma::vec& isnever, const double update_beta1_var_ind){
+
+  arma::mat xx         = Xtildei.slice(0);
+  arma::mat cc2        = inv(inv(prior_beta_cov.slice(0)) + (mmi * iSigmae(0,0) * (xx.t() * xx)));
+  double mmbeta        = beta.n_rows;
+  arma::mat cc1        = arma::zeros(mmbeta,1);
+  cc1        = cc1 + (inv(prior_beta_cov.slice(0)) * prior_beta_mean.col(0));
+  for( int jji=0; jji< mmi; jji ++){
+    arma::mat w = Wtildei.slice(jji);
+    cc1    = cc1 + (iSigmae(0,0)*(xx.t() * (w.col(0) - Utildei.col(0))));
+    cc1    = cc1 + (iSigmae(0,1)*(xx.t() * (w.col(1) - Utildei.col(1))));
+    cc1    = cc1 + (iSigmae(0,2)*(xx.t() * (w.col(2) - Utildei.col(2))));
+  }
+
+  arma::vec beta1_curr = beta.col(0);
+  cc2 = (cc2 + cc2.t())/2;
+  //std::cout<<"C2 beta1"<<std::endl;
+  //std::cout<<cc2<<std::endl;
+  arma::mat t = arma::sqrtmat_sympd(cc2/update_beta1_var_ind);
+  arma::vec beta1_cand = beta1_curr + (t * arma::randn(mmbeta,1));
+  double n = xx.n_rows;
+  arma::vec  v = arma::ones(n);
+  double lc2_cand   = -mmi * sum(arma::find_finite(isnever % log((v - arma::normcdf((xx * beta1_cand) + Utildei.col(0))))));
+  double lc2_curr   = -mmi * sum(arma::find_finite(isnever % log((v - arma::normcdf((xx * beta1_curr) + Utildei.col(0))))));
+
+  arma::mat lc1_cand   = cc1.t() * beta1_cand - beta1_cand.t() * inv(cc2) * beta1_cand /2;
+  arma::mat lc1_curr   = cc1.t() * beta1_curr - beta1_curr.t() * inv(cc2) * beta1_curr /2;
+
+  arma::mat A(1,1);
+  A.ones();
+  arma::mat gghh       = arma::min(A ,exp( lc1_cand + lc2_cand - lc1_curr - lc2_curr));
+
+  arma::mat ss(1,1);
+  ss(0,0)            = arma::randu<double>();
+  double rri;
+  if(ss(0,0) < gghh(0,0)){
+    rri = 1;
+  }
+
+  arma::vec beta1      = (beta1_cand * rri) + (beta1_curr * (1 - rri));
+
+  return(beta1);
+
+}
+
+
+// [[Rcpp::export]]
+arma::colvec update_beta1_with_prior_mean_c(const arma::cube& Xtildei, const double mmi, const arma::mat& prior_beta_mean,
+                                            const arma::cube prior_beta_cov, const arma::mat& beta, const arma::cube& Wtildei, const arma::mat& Utildei,
+                                            const arma::mat& iSigmae, const arma::colvec& isnever, const double update_beta1_var_ind){
+
+  // # This program updated beta1 using  Metropolis step. It also uses the fact
+  // # that the design matrix for the food is the same for every repeat. This
+  // # code would have to be changed is this were not true.
+  // #
+  // # Input
+  // # Xtildei        = design matrix
+  // # mmi            = # of recalls (assumed same for all)
+  // # cov_prior_beta = the prior covariance matrix for beta1
+  // # beta           = the current values of all the betas
+  // # Wtildei        = the latent and non-latent responses
+  // # Utildei        = the latent person-specific effects
+  // # iSigmae        = the 2x2 inverse of Sigmae. iSigmae(1,1) = 1
+  arma::mat xx         = Xtildei.slice(0);
+  arma::mat cc2        = arma::inv(arma::inv(prior_beta_cov.slice(0)) +
+    (mmi * iSigmae(0,0) * (arma::trans(xx)* xx)));
+  double mmbeta     = beta.n_rows;
+  arma::mat cc1        = arma::zeros(mmbeta,1);
+  cc1        = cc1 + (arma::inv(prior_beta_cov.slice(0)) * prior_beta_mean.col(0));
+  for (int jji = 0; jji< mmi; jji++){
+    arma::mat w = Wtildei.slice(jji);
+    cc1    = cc1 + (iSigmae(0,0)*(xx.t() * (w.col(0) - Utildei.col(0))));
+    cc1    = cc1 + (iSigmae(0,1)*(xx.t() * (w.col(1) - Utildei.col(1))));
+    cc1    = cc1 + (iSigmae(0,2)*(xx.t() * (w.col(2) - Utildei.col(2))));
+  }
+  //cc2 = (cc2 + cc2.t())/2;
+  arma::mat t = arma::sqrtmat_sympd(cc2/update_beta1_var_ind);
+  arma::vec beta1_cand = (cc2 * cc1) + (t* arma::randn(mmbeta,1));
+  arma::vec  beta1_curr = beta.col(0);
+  double n = xx.n_rows;
+  arma::vec  v = arma::ones(n);
+  double lc2_cand   = -mmi * sum(arma::find_finite(isnever %log((1 - arma::normcdf((xx * beta1_cand) + Utildei.col(0))))));
+  double lc2_curr   = -mmi * sum(arma::find_finite(isnever %
+                                 log((1 - arma::normcdf((xx* beta1_curr) + Utildei.col(0))))));
+  arma::mat lc1_cand   = cc1.t() * beta1_cand - beta1_cand.t() * inv(cc2) * beta1_cand /2;
+  arma::mat lc1_curr   = cc1.t() * beta1_curr - beta1_curr.t() * inv(cc2) * beta1_curr /2;
+
+  arma::mat A(1,1);
+  A.ones();
+
+  arma::mat gghh       = arma::min(A ,exp( (1-update_beta1_var_ind) *lc1_cand + lc2_cand
+                                             - (1-update_beta1_var_ind) * lc1_curr - lc2_curr));
+
+  arma::mat ss(1,1);
+  ss(0,0)            = arma::randu<double>();
+  double rri;
+  if(ss(0,0) < gghh(0,0)){
+    rri = 1;
+  }
+  arma::colvec beta1      = (beta1_cand * rri) + (beta1_curr * (1 - rri));
+
+  return(beta1);
+
+}
+
+// [[Rcpp::export]]
+arma::colvec update_beta2_with_prior_mean_c(const arma::cube& Xtildei, const double mmi, const arma::mat& prior_beta_mean,
+                                            const arma::cube prior_beta_cov, const arma::mat& beta, const arma::cube& Wtildei, const arma::mat& Utildei,
+                                            const arma::mat& iSigmae){
+
+  // % This program updated beta2, and requires no Metropolis step. It also uses
+  // % the fact that the design matrix for the food is the same for every
+  // % repeat. This code would have to be changed is this were not true.
+  // %
+  // % There is another special feature about this problem, namely that since
+  // % there is no energy, Sigmae is diagonal. This makes the step for beta2 a
+  // % lot different.
+  // %
+  // % Input
+  // % Xtildei        = design matrix
+  // % mmi            = # of recalls (assumed same for all)
+  // % cov_prior_beta = the prior covariance matrix for beta1
+  // % beta           = the current values of all the betas
+  // % Wtildei        = the latent and non-latent responses
+  // % Utildei        = the latent person-specific effects
+  // % iSigmae        = the 2x2 inverse of Sigmae. iSigmae(1,1) = 1
+
+  arma::mat xx         = Xtildei.slice(0);
+  arma::mat cc2        = inv(inv(prior_beta_cov.slice(0)) + (mmi * iSigmae(0,0) * (xx.t() * xx)));
+  double mmbeta        = beta.n_rows;
+  arma::mat cc1        = arma::zeros(mmbeta,1);
+  cc1        = cc1 + (inv(prior_beta_cov.slice(1)) * prior_beta_mean.col(1));
+  for( int jji=0; jji< mmi; jji ++){
+    arma::mat w = Wtildei.slice(jji);
+    cc1    = cc1 + (iSigmae(1,1)*(xx.t() * (w.col(1) - Utildei.col(1))));
+    cc1    = cc1 + (iSigmae(0,1)*(xx.t() * (w.col(0) - (xx * beta.col(0)) - Utildei.col(0))));
+    cc1    = cc1 + (iSigmae(1,2)*(xx.t() * (w.col(2) - (xx * beta.col(2)) - Utildei.col(2))));
+  }
+  //cc2 = (cc2 + cc2.t())/2;
+  arma::mat t = arma::sqrtmat_sympd(cc2);
+  arma::colvec beta2      = (cc2 * cc1) + (t * arma::randn(mmbeta,1));
+  return(beta2);
+}
+
+// [[Rcpp::export]]
+arma::colvec update_beta3_with_prior_mean_c(const arma::cube& Xtildei, const double mmi, const arma::mat& prior_beta_mean,
+                                            const arma::cube prior_beta_cov, const arma::mat& beta, const arma::cube& Wtildei, const arma::mat& Utildei,
+                                            const arma::mat& iSigmae){
+
+  // # This program updated beta2, and requires no Metropolis step. It also uses
+  // # the fact that the design matrix for the food is the same for every
+  // # repeat. This code would have to be changed is this were not true.
+  // #
+  // # There is another special feature about this problem, namely that since
+  // # there is no energy, Sigmae is diagonal. This makes the step for beta2 a
+  // # lot different.
+  // #
+  // # Input
+  // # Xtildei        = design matrix
+  // # mmi            = # of recalls (assumed same for all)
+  // # cov_prior_beta = the prior covariance matrix for beta1
+  // # beta           = the current values of all the betas
+  // # Wtildei        = the latent and non-latent responses
+  // # Utildei        = the latent person-specific effects
+  // # iSigmae        = the 2x2 inverse of Sigmae. iSigmae(1,1) = 1
+
+  arma::mat xx         = Xtildei.slice(0);
+  arma::mat cc2        = inv(inv(prior_beta_cov.slice(2)) + (mmi * iSigmae(2,2) * (xx.t() * xx)));
+  double mmbeta        = beta.n_rows;
+  arma::mat cc1        = arma::zeros(mmbeta,1);
+  cc1        = cc1 + (inv(prior_beta_cov.slice(2)) * prior_beta_mean.col(2));
+  for( int jji=0; jji< mmi; jji ++){
+    arma::mat w = Wtildei.slice(jji);
+    cc1    = cc1 + (iSigmae(2,2)*(xx.t() * (w.col(2) - Utildei.col(2))));
+    cc1    = cc1 + (iSigmae(0,2)*(xx.t() * (w.col(0) - (xx * beta.col(0)) - Utildei.col(0))));
+    cc1    = cc1 + (iSigmae(1,2)*(xx.t() * (w.col(1) - (xx * beta.col(1)) - Utildei.col(1))));
+  }
+  //cc2 = (cc2 + cc2.t())/2;
+  arma::mat t = arma::sqrtmat_sympd(cc2);
+  arma::colvec beta3      = (cc2 * cc1) + (t * arma::randn(mmbeta,1));
+
+  return(beta3);
+
+}
+
 // // [[Rcpp::export]]
 // arma::mat ginverse_c(const arma::mat& z,const double lambda){
 //   

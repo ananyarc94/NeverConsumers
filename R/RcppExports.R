@@ -45,6 +45,22 @@ update_Utildei_c <- function(Utildei, beta, Wtildei, iSigmae, Ni, isnever, didco
     .Call(`_NeverConsumersR_update_Utildei_c`, Utildei, beta, Wtildei, iSigmae, Ni, isnever, didconsume, Xtildei, mmi, iSigmau, n)
 }
 
+update_beta1_with_prior_mean_random_walk_c <- function(Xtildei, mmi, prior_beta_mean, prior_beta_cov, beta, Wtildei, Utildei, iSigmae, isnever, update_beta1_var_ind) {
+    .Call(`_NeverConsumersR_update_beta1_with_prior_mean_random_walk_c`, Xtildei, mmi, prior_beta_mean, prior_beta_cov, beta, Wtildei, Utildei, iSigmae, isnever, update_beta1_var_ind)
+}
+
+update_beta1_with_prior_mean_c <- function(Xtildei, mmi, prior_beta_mean, prior_beta_cov, beta, Wtildei, Utildei, iSigmae, isnever, update_beta1_var_ind) {
+    .Call(`_NeverConsumersR_update_beta1_with_prior_mean_c`, Xtildei, mmi, prior_beta_mean, prior_beta_cov, beta, Wtildei, Utildei, iSigmae, isnever, update_beta1_var_ind)
+}
+
+update_beta2_with_prior_mean_c <- function(Xtildei, mmi, prior_beta_mean, prior_beta_cov, beta, Wtildei, Utildei, iSigmae) {
+    .Call(`_NeverConsumersR_update_beta2_with_prior_mean_c`, Xtildei, mmi, prior_beta_mean, prior_beta_cov, beta, Wtildei, Utildei, iSigmae)
+}
+
+update_beta3_with_prior_mean_c <- function(Xtildei, mmi, prior_beta_mean, prior_beta_cov, beta, Wtildei, Utildei, iSigmae) {
+    .Call(`_NeverConsumersR_update_beta3_with_prior_mean_c`, Xtildei, mmi, prior_beta_mean, prior_beta_cov, beta, Wtildei, Utildei, iSigmae)
+}
+
 rcpparma_hello_world <- function() {
     .Call(`_NeverConsumersR_rcpparma_hello_world`)
 }
