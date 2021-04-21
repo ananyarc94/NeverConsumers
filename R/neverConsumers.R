@@ -149,6 +149,7 @@ neverConsumers = function(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_foo
   ###########################################################################
   ID          = zz$ID
   n_subject   = length(unique(ID))
+  ID = rep(1:n_subject, each = mmi)
   ###########################################################################
   # If you do not have an FFQ for the food, you need to set G. In this case,
   # I have simply set G = 1. In can in principle be changed.
@@ -620,83 +621,83 @@ neverConsumers = function(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_foo
   beta_34 <-  beta_thin_trace[ 4,3, ]
   beta_35 <-  beta_thin_trace[ 5,3, ]
   
-  # par(mfrow = c(1,1))
-  # matplot(t(beta_thin_trace[ ,1, ]), type = "l", ylab = expression(beta[1]))
-  # nn <- ncol(t(beta_thin_trace[ ,1, ]))
-  # legend("topleft", legend = c(expression(beta[11]), expression(beta[12]), expression(beta[13]), expression(beta[14]), expression(beta[15])),col = seq_len(nn),cex = 0.8,fill = seq_len(nn))
-  # title(expression(paste("Traceplot of ", beta[1])))
-  # 
-  # matplot(t(beta_thin_trace[ ,2, ]), type = "l", ylab = expression(beta[2]))
-  # nn <- ncol(t(beta_thin_trace[ ,2, ]))
-  # legend("topleft", legend = c(expression(beta[21]), expression(beta[22]), expression(beta[23]), expression(beta[24]), expression(beta[25])),col = seq_len(nn),cex = 0.8,fill = seq_len(nn))
-  # title(expression(paste("Traceplot of ",beta[2])))
-  # 
-  # matplot(t(beta_thin_trace[ ,3, ]), type = "l", ylab = expression(beta[3]))
-  # nn <- ncol(t(beta_thin_trace[ ,3, ]))
-  # legend("topleft", legend = c(expression(beta[31]), expression(beta[32]), expression(beta[33]), expression(beta[34]), expression(beta[35])),col = seq_len(nn),cex = 0.8,fill = seq_len(nn))
-  # title(expression(paste("Traceplot of ",beta[3])))
-  # 
-  # par(mfrow = c(2,1))
-  # plot(alpha_thin_trace[ ,1], type = "l", ylab = expression(alpha[1]))
-  # title(expression(paste("Traceplot of ",alpha[1])))
-  # plot(alpha_thin_trace[ ,2], type = "l", ylab = expression(alpha[2]))
-  # title(expression(paste("Traceplot of ",alpha[2])))
-  # 
-  # par(mfrow = c(1,1))
-  # plot(never_thin_trace, type = "l", ylab = "Probability")
-  # title("Traceplot of probability of being never consumers")
-  # 
-  # par(mfrow = c(2,2))
-  # plot(r_thin_trace, type = "l", ylab = "r")
-  # title(expression(paste("Traceplot of ",r)))
-  # plot(theta_thin_trace, type = "l", ylab = expression(theta))
-  # title(expression(paste("Traceplot of ",theta)))
-  # plot(s22_thin_trace, type = "l", ylab = expression(s[22]))
-  # title(expression(paste("Traceplot of ",s[22])))
-  # plot(s33_thin_trace, type = "l", ylab = expression(s[33]))
-  # title(expression(paste("Traceplot of ",s[33])))
-  # 
-  # 
-  # par(mfrow = c(3,3))
-  # plot((Sigmae_thin_trace[1,1,]), type = "l", ylab = expression(sigma[e[11]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[e[11]])))
-  # plot((Sigmae_thin_trace[1,2,]), type = "l", ylab = expression(sigma[e[12]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[e[12]])))
-  # plot((Sigmae_thin_trace[1,3,]), type = "l", ylab = expression(sigma[e[13]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[e[13]])))
-  # plot((Sigmae_thin_trace[2,1,]), type = "l", ylab = expression(sigma[e[21]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[e[21]])))
-  # plot((Sigmae_thin_trace[2,2,]), type = "l", ylab = expression(sigma[e[22]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[e[22]])))
-  # plot((Sigmae_thin_trace[2,3,]), type = "l", ylab = expression(sigma[e[23]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[e[23]])))
-  # plot((Sigmae_thin_trace[3,1,]), type = "l", ylab = expression(sigma[e[31]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[e[31]])))
-  # plot((Sigmae_thin_trace[3,2,]), type = "l", ylab = expression(sigma[e[32]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[e[32]])))
-  # plot((Sigmae_thin_trace[3,3,]), type = "l", ylab = expression(sigma[u[33]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[e[33]])))
-  # 
-  # par(mfrow = c(3,3))
-  # plot((Sigmau_thin_trace[1,1,]), type = "l", ylab = expression(sigma[u[11]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[u[11]])))
-  # plot((Sigmau_thin_trace[1,2,]), type = "l", ylab = expression(sigma[u[12]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[u[12]])))
-  # plot((Sigmau_thin_trace[1,3,]), type = "l", ylab = expression(sigma[u[13]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[u[13]])))
-  # plot((Sigmau_thin_trace[2,1,]), type = "l", ylab = expression(sigma[u[21]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[u[21]])))
-  # plot((Sigmau_thin_trace[2,2,]), type = "l", ylab = expression(sigma[u[22]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[u[22]])))
-  # plot((Sigmau_thin_trace[2,3,]), type = "l", ylab = expression(sigma[u[23]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[u[23]])))
-  # plot((Sigmau_thin_trace[3,1,]), type = "l", ylab = expression(sigma[u[31]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[u[31]])))
-  # plot((Sigmau_thin_trace[3,2,]), type = "l", ylab = expression(sigma[u[32]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[u[32]])))
-  # plot((Sigmau_thin_trace[3,3,]), type = "l", ylab = expression(sigma[u[33]]),xlab = "Iteration")
-  # title(expression(paste("Traceplot of ",sigma[u[33]])))
-  # 
+  par(mfrow = c(1,1))
+  matplot(t(beta_thin_trace[ ,1, ]), type = "l", ylab = expression(beta[1]))
+  nn <- ncol(t(beta_thin_trace[ ,1, ]))
+  legend("topleft", legend = c(expression(beta[11]), expression(beta[12]), expression(beta[13]), expression(beta[14]), expression(beta[15])),col = seq_len(nn),cex = 0.8,fill = seq_len(nn))
+  title(expression(paste("Traceplot of ", beta[1])))
+
+  matplot(t(beta_thin_trace[ ,2, ]), type = "l", ylab = expression(beta[2]))
+  nn <- ncol(t(beta_thin_trace[ ,2, ]))
+  legend("topleft", legend = c(expression(beta[21]), expression(beta[22]), expression(beta[23]), expression(beta[24]), expression(beta[25])),col = seq_len(nn),cex = 0.8,fill = seq_len(nn))
+  title(expression(paste("Traceplot of ",beta[2])))
+
+  matplot(t(beta_thin_trace[ ,3, ]), type = "l", ylab = expression(beta[3]))
+  nn <- ncol(t(beta_thin_trace[ ,3, ]))
+  legend("topleft", legend = c(expression(beta[31]), expression(beta[32]), expression(beta[33]), expression(beta[34]), expression(beta[35])),col = seq_len(nn),cex = 0.8,fill = seq_len(nn))
+  title(expression(paste("Traceplot of ",beta[3])))
+
+  par(mfrow = c(2,1))
+  plot(alpha_thin_trace[ ,1], type = "l", ylab = expression(alpha[1]))
+  title(expression(paste("Traceplot of ",alpha[1])))
+  plot(alpha_thin_trace[ ,2], type = "l", ylab = expression(alpha[2]))
+  title(expression(paste("Traceplot of ",alpha[2])))
+
+  par(mfrow = c(1,1))
+  plot(never_thin_trace, type = "l", ylab = "Probability")
+  title("Traceplot of probability of being never consumers")
+
+  par(mfrow = c(2,2))
+  plot(r_thin_trace, type = "l", ylab = "r")
+  title(expression(paste("Traceplot of ",r)))
+  plot(theta_thin_trace, type = "l", ylab = expression(theta))
+  title(expression(paste("Traceplot of ",theta)))
+  plot(s22_thin_trace, type = "l", ylab = expression(s[22]))
+  title(expression(paste("Traceplot of ",s[22])))
+  plot(s33_thin_trace, type = "l", ylab = expression(s[33]))
+  title(expression(paste("Traceplot of ",s[33])))
+
+
+  par(mfrow = c(3,3))
+  plot((Sigmae_thin_trace[1,1,]), type = "l", ylab = expression(sigma[e[11]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[e[11]])))
+  plot((Sigmae_thin_trace[1,2,]), type = "l", ylab = expression(sigma[e[12]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[e[12]])))
+  plot((Sigmae_thin_trace[1,3,]), type = "l", ylab = expression(sigma[e[13]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[e[13]])))
+  plot((Sigmae_thin_trace[2,1,]), type = "l", ylab = expression(sigma[e[21]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[e[21]])))
+  plot((Sigmae_thin_trace[2,2,]), type = "l", ylab = expression(sigma[e[22]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[e[22]])))
+  plot((Sigmae_thin_trace[2,3,]), type = "l", ylab = expression(sigma[e[23]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[e[23]])))
+  plot((Sigmae_thin_trace[3,1,]), type = "l", ylab = expression(sigma[e[31]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[e[31]])))
+  plot((Sigmae_thin_trace[3,2,]), type = "l", ylab = expression(sigma[e[32]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[e[32]])))
+  plot((Sigmae_thin_trace[3,3,]), type = "l", ylab = expression(sigma[u[33]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[e[33]])))
+
+  par(mfrow = c(3,3))
+  plot((Sigmau_thin_trace[1,1,]), type = "l", ylab = expression(sigma[u[11]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[u[11]])))
+  plot((Sigmau_thin_trace[1,2,]), type = "l", ylab = expression(sigma[u[12]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[u[12]])))
+  plot((Sigmau_thin_trace[1,3,]), type = "l", ylab = expression(sigma[u[13]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[u[13]])))
+  plot((Sigmau_thin_trace[2,1,]), type = "l", ylab = expression(sigma[u[21]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[u[21]])))
+  plot((Sigmau_thin_trace[2,2,]), type = "l", ylab = expression(sigma[u[22]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[u[22]])))
+  plot((Sigmau_thin_trace[2,3,]), type = "l", ylab = expression(sigma[u[23]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[u[23]])))
+  plot((Sigmau_thin_trace[3,1,]), type = "l", ylab = expression(sigma[u[31]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[u[31]])))
+  plot((Sigmau_thin_trace[3,2,]), type = "l", ylab = expression(sigma[u[32]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[u[32]])))
+  plot((Sigmau_thin_trace[3,3,]), type = "l", ylab = expression(sigma[u[33]]),xlab = "Iteration")
+  title(expression(paste("Traceplot of ",sigma[u[33]])))
+
   
   
   return(list(alpha_postmean = alpha_postmean,alpha_postsd = alpha_postsd, alpha_ci = alpha_ci, 
@@ -709,3 +710,4 @@ neverConsumers = function(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_foo
               food_distribution = food_distribution, energy_distribution = energy_distribution, 
               ratio_distribution = ratio_distribution))
 }
+
