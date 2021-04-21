@@ -119,7 +119,7 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
    #                    0.2203,    0.5566,    0.0273,
    #                    0.0856,    0.0273,    0.5109), nrow = 3, byrow = T)
    # # # print(Sigmau)
-    iSigmau     <- pracma::inv(Sigmau_new)
+    iSigmau     <- iSigmau_new
     ###########################################################################
     # Update Utildei. This is done in two steps. In the first step, we generate
     # it assuming that everyone is a consumer. In the second step, those who
