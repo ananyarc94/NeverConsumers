@@ -134,7 +134,7 @@ neverConsumers = function(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_foo
   if (is.null(ID_col)) {
     stop(paste("Please specify where the column with the subject ID's"))
   }
-  # Initiaization of SigmaU
+  # Initilization of SigmaU
   if (is.null(Sigmau_temp_episodically)) {
     Sigmau_temp_episodically = diag(rep(0.5,3)) + matrix(0.5, 3, 3)
   }
@@ -265,6 +265,7 @@ neverConsumers = function(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_foo
   # 0.5 for with covariates in alpha;
   # 0.8 for without covariates in alpha
   alpha_prior_sd <- ((with_covariates_ind == 0) * 0.4 + (with_covariates_ind != 0) * 1)
+  
   # prior standard deviation for alpha
   # 0.4 for with covariates in alpha;
   # 0.2 for without covariates in alpha
