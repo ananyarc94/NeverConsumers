@@ -13,115 +13,140 @@ using namespace std;
  */
 double mod(double a, int n)
 {
-  return a - floor(a/n)*n;
+  return a - std::floor(a/n)*n;
 }   
 
 
 // [[Rcpp::export]]
-arma::vec gen_truncated_normals_never_c(const arma::vec& trunc_value, const arma::mat& startxi,double numgen){
+arma::mat gen_truncated_normals_never_c(const arma::mat& trunc_value,
+                                        const arma::mat& startxi,double numgen){
   
   // calling exp()
   //Function f("exp");   
   
   // arma::mat a(2,2);
   //   a.zeros();
-  unsigned long int i;
-  double  eps    = 2.2204*std::exp(-16);
-  int  n      = trunc_value.n_elem;
-  arma::vec alpha(n), aa(n), thesign(n);;
-  for(i = 0; i < n; i++) {
-    alpha(i)  = (trunc_value(i) + std::sqrt(4 + std::pow(trunc_value(i), 2))) / 2;
+  
+  double  eps = 2.2204*std::exp(-16);
+  int  n = trunc_value.n_rows;
+  arma::mat alpha(n,1), aa(n,1), thesign(n,1);
+  arma::mat genww = arma::zeros(n,1);
+  for(int i = 0; i < n; i++) {
+    alpha(i,0)  = (trunc_value(i,0) + std::sqrt(4 + std::pow(trunc_value(i,0), 2))) / 2;
     }
   //arma::mat alpha  = (trunc_value + std::sqrt(4 + std::pow(trunc_value, 2))) / 2;
   
-  
-  for(i = 0; i< n; i++){
-    if(trunc_value(i) >= 0.0){
-      //aa(i) = 1;
-      thesign(i) = 1;
-    }else{
-      //aa(i) = 0;
-      thesign(i) = 0;
+  for(int i = 0; i< n; i++){
+    if(trunc_value(i,0) >= 0.0)
+      thesign(i,0) = 1.0;
+    else
+      thesign(i,0) = 0.0;
     }
+  
+  // Implementing arma::mat genww  = trunc_value % aa;
+  
+  for(int i = 0; i< n; i++){
+    if(trunc_value(i,0) > 0.0)
+      genww(i,0) = trunc_value(i,0);
   }
   
-  for(i = 0; i< n; i++){
-    if(trunc_value(i) > 0.0){
-      aa(i) = 1;
-      //thesign(i) = 1;
-    }else{
-      aa(i) = 0;
-      //thesign(i) = 0;
-    }
-  }
+  arma::mat temp2  = arma::randn(n,1);
+  arma::mat onemat = arma::ones(n,1);
+  arma::mat mmmm(n,1), kkkk(n,1), hhhh(n,1);
   
-  arma::vec genww  = trunc_value % aa;
-  arma::vec temp2  = arma::randn(n,1);
-  arma::vec mmmm(n), kkkk(n), hhhh(n);
   for(int jj = 1; jj<= numgen; jj++){
-    arma::vec xicand = trunc_value - ( (1 / alpha) % log(arma::randu(n,1)));
-    arma::vec gg = exp(-0.5 * arma::pow( (xicand - alpha), 2));
-    arma::vec ss = arma::randn(n,1);
+    arma::mat alpha_inv = arma::zeros(n,1);
+    for (int i=0;i<n;i++){
+      alpha_inv(i,0) = 1/alpha(i,0);
+      }
     
-    for(i=0; i<n; i++){
-      if( ss(i) < gg(i)){
-        mmmm(i) = 1;
+    arma::mat unif = arma::randu(n,1);
+    
+    arma::mat term1 = alpha_inv % arma::log(unif);
+   
+    arma::mat xicand = trunc_value - term1; //( (1 / alpha) % log(arma::randu(n,1)));
+    arma::mat gg = arma::exp(-0.5 * arma::pow( (xicand - alpha), 2));
+    arma::mat ss = arma::randu(n,1);
+    
+    for(int i=0; i<n; i++){
+      if( ss(i,0) < gg(i,0))
+        mmmm(i,0) = 1.0;
+      else
+        mmmm(i,0) = 0.0;
+      }
+
+    
+    arma::mat temp1  = (xicand % mmmm) + (genww % (onemat - mmmm));
+    arma::mat ssss   = arma::randn(n,1);
+    
+    for(int i=0; i<n; i++){
+      if( ssss(i,0) < trunc_value(i,0)){
+        kkkk(i,0) = 1.0;
       }else{
-        mmmm(i) = 0;
+        kkkk(i,0) = 0.0;
       }}
-    
-    arma::vec temp1  = (xicand % mmmm) + (genww % (1 - mmmm));
-    arma::vec ssss   = arma::randn(n,1);
-    
-    for(i=0; i<n; i++){
-      if( ssss(i) < trunc_value(i)){
-        kkkk(i) = 1;
-      }else{
-        kkkk(i) = 0;
-      }}
-    temp2  = (temp2 % kkkk) +       (ssss % (1 - kkkk));
-    genww  = (temp2 % thesign) + (temp1 % (1 - thesign ));
+    temp2  = (temp2 % kkkk) +       (ssss % (onemat - kkkk));
+    genww  = (temp2 % (onemat - thesign) + (temp1 % thesign ));
   }
-  for(i=0; i<n; i++){
-    if( genww(i) > trunc_value(i)){
-      hhhh(i) = 1;
+ 
+  for(int i=0; i<n; i++){
+    if( genww(i,0) > trunc_value(i,0)){
+      hhhh(i,0) = 1.0;
     }else{
-      hhhh(i) = 0;
-    }}
+      hhhh(i,0) = 0.0;
+    }
+  }
+  arma::mat eps_mat = arma::zeros(n,1);
+  for(int i=0; i<n; i++){
+    eps_mat(i,0) = eps;
+    }
   
-  genww  = (genww % hhhh) + ((trunc_value + eps) % (1 - hhhh));
+  genww  = (genww % hhhh) + ((trunc_value + eps_mat) % (onemat - hhhh));
   return(genww);
+//return(arma::ones(10));
   
 }
 
 
 // [[Rcpp::export]]
-Rcpp::List update_Ni_with_covariates_c(const arma::cube& Xtildei,const arma::mat& beta,const arma::mat& Utildei,const arma::vec& alpha,const arma::mat& GGalpha,const double n,const double mmi,const arma::vec& didconsume){
+Rcpp::List update_Ni_with_covariates_c(const arma::cube& Xtildei,const arma::mat& beta,
+                                       const arma::mat& Utildei,const arma::vec& alpha,
+                                       const arma::mat& GGalpha,const double n,
+                                       const double mmi,const arma::vec& didconsume){
 
-  arma::vec  tt = (Xtildei.slice(1) * beta.col(1)) + Utildei.col(1) ;
-  arma::vec aq1 = arma::normcdf(tt,0,1);
-  arma::vec aq2 = arma::normcdf(GGalpha*alpha,0,1);
-  arma::vec cc1 = aq2 % arma::pow((1 - aq1), mmi) / (1 - aq2);
-  arma::vec ppi = 1 / (1 + cc1);
-  arma::vec   Ni      = arma::zeros(n,1);
-  arma::vec kk = GGalpha*alpha;
-  arma::vec genww1  = gen_truncated_normals_never_c(-kk,-kk % arma::ones(n,1),50.0);
-  arma::vec genww2  = gen_truncated_normals_never_c(kk,-kk % arma::ones(n,1),50.0);
-
-  arma::vec uu = arma::randu(n,1);
-  arma::vec rri(n);
-  for(int i=0; i< n; i++){
-    if(uu(i) < ppi(i)){
-      rri(i) = 1;
-    }else{
-      rri(i) = 0;
+  arma::mat  tt = (Xtildei.slice(1) * beta.col(1)) + Utildei.col(1);
+  arma::mat aq1 = arma::normcdf(tt,0,1);
+  arma::mat aq2 = arma::normcdf(GGalpha*alpha,0,1);
+  arma::mat denom = arma::zeros(aq2.n_rows,1);
+  arma::mat midterm(n,1);
+  for(int i=0;i<aq2.n_rows;i++){
+    denom(i,0) = 1/(1-aq2(i,0));
+    midterm(i,0) = std::pow((1 - aq1(i,0)), mmi);
     }
+  arma::mat cc1 = aq2 % midterm % denom;
+  arma::mat onemat = arma::ones(n,1);
+  arma::mat ppi(cc1.n_rows, 1) ;
+  for(int i = 0; i<cc1.n_rows; i++){
+    ppi(i,0) =  1 / (1 + cc1(i, 0));
+    }
+  arma::mat Ni = arma::zeros(n,1);
+  arma::mat kk = GGalpha * alpha;
+  arma::mat genww1  = gen_truncated_normals_never_c(-kk,-kk % arma::ones(n,1),50.0);
+  arma::mat genww2  = gen_truncated_normals_never_c(kk,-kk % arma::ones(n,1),50.0);
 
+  arma::mat uu = arma::randu(n,1);
+  arma::mat rri(n,1);
+  for(int i=0; i< n; i++){
+    if(uu(i,0) < ppi(i,0)){
+      rri(i,0) = 1.0;
+    }else{
+      rri(i,0) = 0.0;
+    }
   }
 
 
-  Ni      = GGalpha*alpha + (didconsume % genww1) +
-    ((1-didconsume) % (((1-rri) % genww1) - (rri % genww2)));
+  Ni = GGalpha*alpha + (didconsume % genww1) +
+    ((onemat-didconsume) % (((onemat-rri) % genww1) - (rri % genww2)));
 
   return Rcpp::List::create( Rcpp::Named("Ni") = Ni, Rcpp::Named("ppi") = ppi);
 }
