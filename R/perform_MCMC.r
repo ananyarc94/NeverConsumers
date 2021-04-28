@@ -33,18 +33,9 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     update_Ni <- update_Ni_with_covariates(Xtildei,beta,Utildei,alpha,
                                             GGalpha,n,mmi,didconsume)
     Ni       <- update_Ni$Ni
-    #sum(Ni)
-    # Ni = c(1.2109,1.5063, -0.1293, -0.9696, 0.0762, 1.9260, 1.2277, 1.1190, 0.8241,
-    #       1.8091, 0.8225, 2.7636, 0.8965, 1.9034, -0.0354, 0.3180, 0.3111, 0.4309,
-    #      0.8641, 1.7307)
     ppi      <- update_Ni$ppi
     isnever  <- as.numeric(Ni < 0)# Indicator of a never-consumer
     
-    # update_Ni<- update_Ni_with_covariates_c(Xtildei,beta,Utildei,alpha,
-    #                                       GGalpha,n,mmi,didconsume)
-    # Ni       <- update_Ni$Ni
-    # ppi      <- update_Ni$ppi
-    # isnever  <- as.numeric(Ni < 0)
     ###########################################################################
     # Update alpha. In the following, the complete con, ditional for alpha is
     # that is a truncated normal from the left at alpha_min, but with mean (cc2
@@ -57,15 +48,15 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     mujj    <- cc2 %*% cc1
     sijj    <- pracma::sqrtm(cc2)$B
     alpha   <- mujj + sijj %*% pracma::randn(ncol(GGalpha),1)
-    #alpha = c(1.3617,   -0.0815)
+   
     ###########################################################################
     # Update W1 and W2
     ###########################################################################
     numgen     <- 5
-    Wtildeinew <- gen_Wtildei_1foodplusenergy_never(Wtildei,beta,Xtildei,Utildei,n,
+    Wtildeinew <- gen_Wtildei_1foodplusenergy_never_c(Wtildei,beta,Xtildei,Utildei,n,
                                                     iSigmae,Wistar,mmi,numgen)
     Wtildei    <- round(Wtildeinew,4)
-    #Wtildei = matrix(c(), nrow = 20, byrow = T)
+    
     ###########################################################################
     # Calculate W-XB-U
     ###########################################################################
@@ -82,14 +73,20 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     ###########################################################################
     # Update iSigmae
     ###########################################################################
+    #print(paste("iteration", i))
     rnew   <- updated_parameter_r_never(r,theta,s22,s33,qq,mmi,n)
     (r        <- rnew)
+    #print(paste("iteration", i))
+    #print(paste("r = ",r))
     thetanew <- updated_parameter_theta_never(r,theta,s22,s33,qq,mmi)
     (theta    <- thetanew)
+    #print(paste("theta = ",theta))
     s22new   <- updated_parameter_s22_never(r,theta,s22,s33,qq,mmi,n)
     (s22      <- s22new)
+    #print(paste("s22 = ",s22))
     s33new   <- updated_parameter_s33_never(r,theta,s22,s33,qq,mmi,n)
     (s33      <- s33new)
+    #print(paste("s33 = ",33))
 
     R     <-  matrix(c(1,     0,    r*cos(theta),
                        0,     1,    r*sin(theta),
@@ -97,11 +94,8 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
 
     A <- diag(c(1, sqrt(s22), sqrt(s33)))
     Sigmae       <- A %*% R %*% A
-    #paste("Sigmae", Sigmae)
+    #print(paste("Sigmae = ", Sigmae))
     
-    #Sigmae = matrix(c(1.0000,         0,    0.0848,
-    #                  0,    2.1192,    0.4257,
-    #                  0.0848,    0.4257,    1.5144), nrow = 3, byrow = T)
     iSigmae      <- round(pracma::inv(Sigmae),3)
     #print(iSigmae)
     ###########################################################################
@@ -115,9 +109,6 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     iSigmau_new <- update_sig$iSigmau_new
     Sigmau      <- Sigmau_new
 
-   #  Sigmau = Sigmau_new = matrix(c(0.4452,    0.2203,    0.0856,
-   #                    0.2203,    0.5566,    0.0273,
-   #                    0.0856,    0.0273,    0.5109), nrow = 3, byrow = T)
    # # # print(Sigmau)
     iSigmau     <- iSigmau_new
     ###########################################################################
@@ -132,39 +123,11 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
                                  Ni,isnever,didconsume,Xtildei,mmi,iSigmau,n)
     Utildei     <- Utildei_new
     
-    # Utildei = matrix(c(0.7441,    0.6363,   -0.4027,
-    #                    -0.9594,    0.0139,    0.6437,
-    #                    0.0125,   -0.3568,    0.1962,
-    #                    0.1495,    0.0328,    0.7694,
-    #                    -0.4692,   -0.0193,   -0.3197,
-    #                    -0.5966,   -0.3704,   -0.2199,
-    #                    -0.1015,    0.5187,    0.1877,
-    #                    -0.3132,   -0.4491,   -0.4452,
-    #                    -0.4777 ,  -0.1950,   -0.1410,
-    #                    -0.5459 ,  -0.0889 ,   0.7332,
-    #                    0.9566 ,   0.3427 ,  -0.2191,
-    #                    -0.4406 ,  -0.3301,   -0.8149,
-    #                    0.9720  ,  0.8079 ,  -0.9089,
-    #                    0.2645  , -0.0624 ,   0.5897,
-    #                    -0.2668 ,   0.3419 ,   0.0790,
-    #                    -0.0198 ,   0.0818 ,   0.0049,
-    #                    0.4486  , -0.1085  , -0.1987,
-    #                    1.2091  ,  0.5237  , -0.5848,
-    #                    0.3839  ,  0.4808  , -0.4679,
-    #                    -0.4724 ,  -0.7147 ,   0.8115), ncol = 3, byrow = T)
+    
     # ###########################################################################
     # Update beta1 using a Metropolis Step.
     ###########################################################################
-    
-    # beta_post = matrix(c(-1.9560,   -0.4660 ,  -0.0020,
-    #                      0.2860,    0.2774   ,-0.2089,
-    #                      0.0075 ,   0.2914    ,0.3137,
-    #                      1.6245  ,  0.5700    ,0.2958,
-    #                      -0.6466  , -0.1751    ,0.2155), nrow = 5, byrow = T)
-    # 
-    # 
-    
-    if (rw_ind == 1) {
+      if (rw_ind == 1) {
       beta1 <- update_beta1_with_prior_mean_random_walk(Xtildei,mmi,
                                                           prior_beta_mean, prior_beta_cov,beta,Wtildei, Utildei,
                                                           iSigmae,isnever,update_beta1_var_ind)
@@ -176,22 +139,21 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     # count if beta1 moves
     beta1_accept_count <- beta1_accept_count + (1 - all(beta1 == beta[ ,1]))
     beta[ ,1]  <- beta1
-    
-    #beta[ ,1]  <- beta_post[ , 1]
+
     ###########################################################################
     # Update beta2. This does not need a Metropolis step
     ###########################################################################
     beta2 <- update_beta2_with_prior_mean(Xtildei,mmi, prior_beta_mean,
                                             prior_beta_cov,beta,Wtildei, Utildei,iSigmae)
     beta[ , 2]  <- beta2
-    #beta[ ,2]  <- beta_post[ , 2]
+   
     ###########################################################################
     # Update beta2. This does not need a Metropolis step
     ###########################################################################
     beta3 <- update_beta3_with_prior_mean(Xtildei,mmi, prior_beta_mean,
                                             prior_beta_cov,beta,Wtildei, Utildei,iSigmae)
     beta[ ,3]  <- beta3
-    #beta[ ,3]  <- beta_post[ , 3]
+    
     ###########################################################################
     # Store results
     ###########################################################################
