@@ -22,6 +22,7 @@ Ni      <- matrix(0,n,1)
 #genww2  = gen_truncated_normals(alpha,-alpha .* ones(n,1),50);
 kk <- GGalpha %*% alpha#ab 3/11
 genww1  <- gen_truncated_normals_never(-kk,-kk * pracma::ones(n,1),50)#ab 3/11
+#genww1  <- gen_truncated_normals_never(-kk,-kk * pracma::ones(n,1),50)
 genww2  <- gen_truncated_normals_never(kk,-kk * pracma::ones(n,1),50)#ab 3/11
 
 rri     <- as.numeric(pracma::rand(n,1) < ppi)
@@ -29,3 +30,9 @@ Ni      <- GGalpha %*% alpha + (didconsume * genww1) +
           ((1-didconsume) * (((1-rri) * genww1) - (rri * genww2)))
 return(list(Ni = Ni, ppi = ppi))
 }
+
+# g_r = g_c = matrix(0,1000,n)
+# for(i in 1:1000) {
+#   g_r[i,] = gen_truncated_normals_never(-kk,-kk * pracma::ones(n,1),50)
+#   g_c[i,] = gen_truncated_normals_never_c(-kk,-kk * pracma::ones(n,1),50)
+# }
