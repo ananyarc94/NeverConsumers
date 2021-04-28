@@ -65,3 +65,14 @@ for (kk      in 1:mmi){# This is the replicate #ab 3/5/11
  Wtildeinew[ ,varnum, ] = a + b
  return(Wtildeinew = Wtildeinew)
 }
+
+
+# g_r = g_c = matrix(0,1000,n)
+# for(i in 1:1000) {
+#   g_r[i,] = gen_truncated_normals_never(-mu/sigma,-startxi,numgen)
+#   g_c[i,] = gen_truncated_normals_never_c(-mu/sigma,-startxi,numgen)
+# }
+# 
+# colMeans(g_r) -  colMeans(g_c)
+# 
+# mean(g_r) -  mean(g_c)
