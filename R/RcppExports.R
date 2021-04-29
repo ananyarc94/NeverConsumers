@@ -65,6 +65,14 @@ update_beta3_with_prior_mean_c <- function(Xtildei, mmi, prior_beta_mean, prior_
     .Call(`_NeverConsumersR_update_beta3_with_prior_mean_c`, Xtildei, mmi, prior_beta_mean, prior_beta_cov, beta, Wtildei, Utildei, iSigmae)
 }
 
+ginverse_c <- function(z, lambda) {
+    .Call(`_NeverConsumersR_ginverse_c`, z, lambda)
+}
+
+backtransform_c <- function(lambda, Xtildei, beta, sigmae, mumu, sigsig, Utildei, n) {
+    .Call(`_NeverConsumersR_backtransform_c`, lambda, Xtildei, beta, sigmae, mumu, sigsig, Utildei, n)
+}
+
 rcpparma_hello_world <- function() {
     .Call(`_NeverConsumersR_rcpparma_hello_world`)
 }

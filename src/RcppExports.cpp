@@ -275,6 +275,36 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// ginverse_c
+arma::mat ginverse_c(const arma::mat& z, const double lambda);
+RcppExport SEXP _NeverConsumersR_ginverse_c(SEXP zSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type z(zSEXP);
+    Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(ginverse_c(z, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// backtransform_c
+arma::mat backtransform_c(const double lambda, arma::mat& Xtildei, arma::vec& beta, double sigmae, double mumu, double sigsig, arma::vec& Utildei, double& n);
+RcppExport SEXP _NeverConsumersR_backtransform_c(SEXP lambdaSEXP, SEXP XtildeiSEXP, SEXP betaSEXP, SEXP sigmaeSEXP, SEXP mumuSEXP, SEXP sigsigSEXP, SEXP UtildeiSEXP, SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Xtildei(XtildeiSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< double >::type sigmae(sigmaeSEXP);
+    Rcpp::traits::input_parameter< double >::type mumu(mumuSEXP);
+    Rcpp::traits::input_parameter< double >::type sigsig(sigsigSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type Utildei(UtildeiSEXP);
+    Rcpp::traits::input_parameter< double& >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(backtransform_c(lambda, Xtildei, beta, sigmae, mumu, sigsig, Utildei, n));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpparma_hello_world
 arma::mat rcpparma_hello_world();
 RcppExport SEXP _NeverConsumersR_rcpparma_hello_world() {
@@ -336,6 +366,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NeverConsumersR_update_beta1_with_prior_mean_c", (DL_FUNC) &_NeverConsumersR_update_beta1_with_prior_mean_c, 10},
     {"_NeverConsumersR_update_beta2_with_prior_mean_c", (DL_FUNC) &_NeverConsumersR_update_beta2_with_prior_mean_c, 8},
     {"_NeverConsumersR_update_beta3_with_prior_mean_c", (DL_FUNC) &_NeverConsumersR_update_beta3_with_prior_mean_c, 8},
+    {"_NeverConsumersR_ginverse_c", (DL_FUNC) &_NeverConsumersR_ginverse_c, 2},
+    {"_NeverConsumersR_backtransform_c", (DL_FUNC) &_NeverConsumersR_backtransform_c, 8},
     {"_NeverConsumersR_rcpparma_hello_world", (DL_FUNC) &_NeverConsumersR_rcpparma_hello_world, 0},
     {"_NeverConsumersR_rcpparma_outerproduct", (DL_FUNC) &_NeverConsumersR_rcpparma_outerproduct, 1},
     {"_NeverConsumersR_rcpparma_innerproduct", (DL_FUNC) &_NeverConsumersR_rcpparma_innerproduct, 1},
