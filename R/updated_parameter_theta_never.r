@@ -20,8 +20,7 @@ if (thetacurr <= thetamin){
                 + ((thetacurr + (2 * spacing)) * as.numeric(ss > 0.66))
     #print(paste("this is ss:", ss,"when thetacurr = ",thetacurr,"and thetacand = ",thetacand,"and spacing = ",spacing," and i = ", i))
     
-}
-else if(thetacurr >= thetamax){
+}else if(thetacurr >= thetamax){
     i = 2
     ss        <- pracma::rand(1,1)
     thetacand <- (thetacurr * as.numeric(ss <= 0.33)) + ((thetacurr - spacing)
@@ -29,9 +28,8 @@ else if(thetacurr >= thetamax){
                 + ((thetacurr - (2 * spacing)) * as.numeric(ss > 0.66))
     #print(paste("this is ss:", ss,"when thetacurr = ",thetacurr,"and thetacand = ",thetacand,"and spacing = ",spacing," and i = ", i))
     
-}
-else if(thetacurr  > thetamin){
-    if (thetacurr < thetamax){
+}else {
+    
         i = 3
     ss        <- pracma::rand(1,1)
     thetacand <- (thetacurr * as.numeric(ss <= 0.33)) + ((thetacurr + spacing)
@@ -41,7 +39,7 @@ else if(thetacurr  > thetamin){
     
     }
     
-}
+
 GofSigmaecurr = formGofSigmae_never(r,thetacurr,s22,s33,qq,mmi)
 GofSigmaecand = formGofSigmae_never(r,thetacand,s22,s33,qq,mmi)
 
