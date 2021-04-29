@@ -15,11 +15,11 @@ update_beta1_with_prior_mean <- function(Xtildei,mmi, prior_beta_mean,
 # Utildei        = the latent person-specific effects
 # iSigmae        = the 2x2 inverse of Sigmae. iSigmae(1,1) = 1
 xx         <- (Xtildei[ , ,1])
-cc2        <- MASS::ginv(MASS::ginv(prior_beta_cov[ , ,1]) +
+cc2        <- pracma::inv(pracma::inv(prior_beta_cov[ , ,1]) +
                 (mmi * iSigmae[1,1] * (crossprod(xx))))
 mmbeta     <- nrow(beta)
 cc1        <- matrix(0,mmbeta,1)
-cc1        <- cc1 + (MASS::ginv(prior_beta_cov[ , ,1]) %*% prior_beta_mean[ ,1])
+cc1        <- cc1 + (pracma::inv(prior_beta_cov[ , ,1]) %*% prior_beta_mean[ ,1])
 for (jji    in 1:mmi){
     cc1    <- cc1 + (iSigmae[1,1]* (t(xx) %*% (Wtildei[ ,1,jji] - Utildei[ ,1])))
     cc1    <- cc1 + (iSigmae[1,2] * (t(xx) %*%
@@ -33,8 +33,8 @@ lc2_cand   <- -mmi * sum(is.finite(isnever *
                log((1 - pnorm((xx %*% beta1_cand) + Utildei[ ,1])))))
 lc2_curr   <- -mmi * sum(is.finite(isnever *
                log((1 - pnorm((xx%*% beta1_curr) + Utildei[ ,1])))))
-lc1_cand   <- t(cc1) %*% beta1_cand - t(beta1_cand) %*% MASS::ginv(cc2) %*% beta1_cand /2
-lc1_curr   <- t(cc1) %*% beta1_curr - t(beta1_curr) %*% MASS::ginv(cc2) %*% beta1_curr /2
+lc1_cand   <- t(cc1) %*% beta1_cand - t(beta1_cand) %*% pracma::inv(cc2) %*% beta1_cand /2
+lc1_curr   <- t(cc1) %*% beta1_curr - t(beta1_curr) %*% pracma::inv(cc2) %*% beta1_curr /2
 
 gghh       <- min(1,exp( (1-update_beta1_var_ind) %*% lc1_cand + lc2_cand
                       - (1-update_beta1_var_ind) %*% lc1_curr - lc2_curr))
