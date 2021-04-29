@@ -556,7 +556,7 @@ neverConsumers = function(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_foo
   ###########################################################################
   usual_intake_ratio_trace <- 1000 * usual_intake_food_trace /
     usual_intake_energy_trace
-  
+
   #food_p_mat = [0:0.0001:0.2, 0.2005:0.0005:1]';
   food_p_mat <- seq(0,1,length.out = 501)
   aa <- usual_intake_food_trace[!is.nan(usual_intake_food_trace)]
@@ -564,31 +564,31 @@ neverConsumers = function(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_foo
   mu_ui_food <- mean(aa)
   sig_ui_food <- sd(aa)
   ##plot(seq(0.01, 0.01, 0.99), food_distribution)
-  
+
   # #energy_p_mat = [0:0.0001:1]';
   energy_p_mat <- seq(0,1,length.out = 501)
   aa <- usual_intake_energy_trace[!is.nan(usual_intake_energy_trace)]
   #aa <- (aa-min(aa))/(max(aa)-min(aa))
   energy_distribution <- make_percentiles_without_weight(aa, energy_p_mat)
-  mu_ui_energy = mean(aa) 
+  mu_ui_energy = mean(aa)
   sig_ui_energy = sd(aa)
   # #plot(0.01:0.01:0.99, energy_distribution)
-  
+
   #ratio_p_mat = [0:0.0001:0.2, 0.2005:0.0005:1]';
   ratio_p_mat = seq(0,1,length.out = 501)
-  aa = usual_intake_ratio_trace[!is.nan(usual_intake_ratio_trace)] 
+  aa = usual_intake_ratio_trace[!is.nan(usual_intake_ratio_trace)]
   ratio_distribution = make_percentiles_without_weight(aa, ratio_p_mat)
-  mu_ui_ratio = mean(aa) 
-  sig_ui_ratio = sd(aa) 
+  mu_ui_ratio = mean(aa)
+  sig_ui_ratio = sd(aa)
   # # #plot(0.01:0.01:0.9mu_ui_energy <- mean(aa)
-  
-  adj_factor = 1  # This is in here because the Norfolk energy data are on a 
+
+  adj_factor = 1  # This is in here because the Norfolk energy data are on a
   # different scale from the EATS energy data.
   ui_percentile_ind = c(5, 10, 25, 50, 75, 90, 95)
   temp1 = t(food_distribution[ui_percentile_ind]);
   temp2 = t(energy_distribution[ui_percentile_ind])/adj_factor;
   temp3 = t(ratio_distribution[ui_percentile_ind])*adj_factor;
-  
+
   # ###########################################################################
   # # What percentage of MCMC steps in which beta1 moves
   # ###########################################################################
@@ -705,10 +705,10 @@ neverConsumers = function(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_foo
               never_postmean = never_postmean, never_postsd = never_postsd, never_ci = never_ci,
               beta_postmean = beta_postmean, beta_postsd = beta_postsd, beta_ci = beta_ci, 
               Sigmau_postmean = Sigmau_postmean, Sigmau_postsd = Sigmau_postsd, Sigmau_ci = Sigmau_ci, 
-              Sigmae_postmean = Sigmae_postmean, Sigmae_postsd = Sigmae_postsd, Sigmae_ci = Sigmae_ci,
-              mu_ui_food = mu_ui_food, sig_ui_food = sig_ui_food, mu_ui_energy = mu_ui_energy, 
-              sig_ui_energy = sig_ui_energy, mu_ui_ratio = mu_ui_ratio, sig_ui_ratio = sig_ui_ratio, 
-              food_distribution = food_distribution, energy_distribution = energy_distribution, 
+              Sigmae_postmean = Sigmae_postmean, Sigmae_postsd = Sigmae_postsd, Sigmae_ci = Sigmae_ci, 
+              mu_ui_food = mu_ui_food, sig_ui_food = sig_ui_food, mu_ui_energy = mu_ui_energy,
+              sig_ui_energy = sig_ui_energy, mu_ui_ratio = mu_ui_ratio, sig_ui_ratio = sig_ui_ratio,
+              food_distribution = food_distribution, energy_distribution = energy_distribution,
               ratio_distribution = ratio_distribution))
 }
 
