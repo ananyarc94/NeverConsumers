@@ -847,76 +847,76 @@ arma::colvec update_beta3_with_prior_mean_c(const arma::cube& Xtildei, const dou
 
 }
 
-// // [[Rcpp::export]]
-// arma::mat ginverse_c(const arma::mat& z,const double lambda){
-//   
-//   //   Computes the inverse of the Box-Cox transformation, and makes sure that
-//   // the argument does not get negative
-//   //
-//   
-//   
-//   arma::mat x(z.n_rows, z.n_cols);
-//   
-//   if (lambda == 0){
-//     x = exp(z);
-//   }
-//   if (lambda > 0){
-//     arma::mat w = 1 + (lambda * z);
-//     
-//     for(int i=0; i < w.n_rows; i++){
-//       for(int j =0; j< w.n_cols; j++){
-//         if(w(i,j) < 0){
-//           w(i,j) = 0;
-//         }
-//         
-//         x(i,j) = pow(w(i,j) , pow(lambda, -1));
-//       }
-//     }
-//     
-//     
-//   }
-//   
-//   return(x);
-//   
-// }
-// 
-// 
-// 
-// 
-// // [[Rcpp::export]]
-// arma::mat backtransform_c(const double lambda,arma::mat& Xtildei,arma::vec& beta,
-//                           double sigmae,double mumu,double sigsig,arma::vec& Utildei,double& n){
-//   // # Compute the 9 point backtransformation for any component
-//   // #
-//   // # INPUT
-//   // # lambda      = the tranformation parameter
-//   // # Xtildei     = the design matrix
-//   // # beta        = the posterior mean
-//   // # sigmae      = standard deviation of epsilon
-//   // # mumu        = the transformed mean
-//   // # sigsig      = the transformed standard deviation
-//   // # Utildei     = the realized U
-//   // # n           = the sample size
-//   //   
-//   // # set the abscissas and weights
-//   arma::vec x = {-2.1,-1.3,-0.8,-0.5, 0.00, 0.5, 0.8, 1.3, 2.1};
-//   arma::vec w = {0.063345, 0.080255, 0.070458, 0.159698, 0.252489,0.159698, 0.070458, 0.080255, 0.063345}; 
-//   
-//   int t = x.n_elem;
-//   arma::vec first_term = (Xtildei * beta + Utildei);
-//   arma::mat temp = arma::repmat(first_term, 1, t ) 
-//     +  arma::repmat(x.t(), n, 1) * sqrt(2) * sigmae; //get the terms in the innermost parentheses
-//   temp =  (mumu + sigsig * temp / sqrt(2));  // de-standardize 
-//   temp = ginverse_c(temp,lambda);
-//   temp = arma::sum(repmat(w.t(), n,1)%temp, 1); //get n*1 vector,  eq A.5 
-//   
-//   
-//   return(temp);
-//   
-// }
-// 
-// 
-// 
+// [[Rcpp::export]]
+arma::mat ginverse_c(const arma::mat& z,const double lambda){
+
+  //   Computes the inverse of the Box-Cox transformation, and makes sure that
+  // the argument does not get negative
+  //
+
+
+  arma::mat x(z.n_rows, z.n_cols);
+  arma::mat one = arma::ones(z.n_rows, z.n_cols);
+  if (lambda == 0){
+    x = arma::exp(z);
+  }
+  if (lambda > 0){
+    arma::mat w = one + (lambda * z);
+
+    for(int i=0; i < w.n_rows; i++){
+      for(int j =0; j< w.n_cols; j++){
+        if(w(i,j) < 0){
+          w(i,j) = 0;
+        }
+
+        x(i,j) = pow(w(i,j) , pow(lambda, -1));
+      }
+    }
+
+
+  }
+
+  return(x);
+
+}
+
+
+
+
+// [[Rcpp::export]]
+arma::mat backtransform_c(const double lambda,arma::mat& Xtildei,arma::vec& beta,
+                          double sigmae,double mumu,double sigsig,arma::vec& Utildei,double& n){
+  // # Compute the 9 point backtransformation for any component
+  // #
+  // # INPUT
+  // # lambda      = the tranformation parameter
+  // # Xtildei     = the design matrix
+  // # beta        = the posterior mean
+  // # sigmae      = standard deviation of epsilon
+  // # mumu        = the transformed mean
+  // # sigsig      = the transformed standard deviation
+  // # Utildei     = the realized U
+  // # n           = the sample size
+  //
+  // # set the abscissas and weights
+  arma::vec x = {-2.1,-1.3,-0.8,-0.5, 0.00, 0.5, 0.8, 1.3, 2.1};
+  arma::vec w = {0.063345, 0.080255, 0.070458, 0.159698, 0.252489,0.159698, 0.070458, 0.080255, 0.063345};
+
+  int t = x.n_elem;
+  arma::vec first_term = (Xtildei * beta + Utildei);
+  arma::mat temp = arma::repmat(first_term, 1, t )
+    +  arma::repmat(x.t(), n, 1) * sqrt(2) * sigmae; //get the terms in the innermost parentheses
+  temp =  (mumu + sigsig * temp / sqrt(2));  // de-standardize
+  temp = ginverse_c(temp,lambda);
+  temp = arma::sum(repmat(w.t(), n,1)%temp, 1); //get n*1 vector,  eq A.5
+
+
+  return(temp);
+
+}
+
+
+
 // 
 // 
 // // [[Rcpp::export]]
