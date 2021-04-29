@@ -1,8 +1,17 @@
-#include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
-#include<stdio.h>
+#include <RcppArmadillo.h>
+#include<cmath>
 using namespace Rcpp;
-using namespace std;
+
+// [[Rcpp::export]]
+int timesTwo(int x)
+{
+  return x*2;
+}
+
+/***R
+timesTwo(42)
+*/
 
 // [[Rcpp::export]]
 /*
@@ -163,22 +172,33 @@ arma::cube gen_Wtildei_1foodplusenergy_never_c(const arma::cube& Wtildei,const a
   for(int kk = 0; kk< mmi; kk++){
     C2      = 1 / iSigmae(varnum,varnum);
     C1      = iSigmae(varnum,varnum) * ((Xtildei.slice(varnum) * beta.col(varnum)) + Utildei.col(varnum));
+    // std::cout<< "y is"<< ((Xtildei.slice(varnum) * beta.col(varnum)) + Utildei.col(varnum)) <<std::endl;
+    // std::cout<< "iSigmae(varnum,varnum)" << iSigmae(varnum,varnum) << std::endl;
+    // std::cout << C1 <<std::endl;
+    // std::cout << (C2*C1) << std::endl;
     for(int jj = 0; jj< Xtildei.n_slices; jj++){
       if(abs(jj - varnum) > 0) {
         arma::mat w = Wtildei.slice(kk);
 
         qq = (w.col(jj) - (Xtildei.slice(jj) * beta.col(jj)) - Utildei.col(jj));
-
+        // std::cout << "C1 initial" << C1 <<std::endl;
+        // std::cout << "qq" << qq <<std::endl;
         C1 = C1 - (iSigmae(varnum,jj) * qq);
+        // std::cout << "iSigmae(varnum,jj)" << iSigmae(varnum,jj) <<std::endl;
+        // std::cout << "C1 new" << C1 <<std::endl;
       }
 
     }
     arma::vec mu      = C2 * C1;
     double sigma   = sqrt(C2);
     arma::vec startxi = mu/sigma;
+    // std::cout << "mu" << mu <<std::endl;
+    // std::cout << "sigma" << sigma <<std::endl;
+    // std::cout << "startxi" << startxi <<std::endl;
     arma::vec genww1  = gen_truncated_normals_never_c(-mu/sigma,-startxi,numgen);
     arma::vec genww2  = gen_truncated_normals_never_c(mu/sigma,-startxi,numgen);
-
+    // std::cout << "genww1" << genww1 <<std::endl;
+    // std::cout << "genww2" << genww2 <<std::endl;
     //arma::mat w = Wtildeinew.slice(kk);
     Wtildeinew(arma::span::all,arma::span(varnum),arma::span(kk)) = mu + (sigma * ((Wistar.col(kk) % genww1) - ((1 - Wistar.col(kk)) % genww2)));
 
@@ -194,13 +214,21 @@ arma::cube gen_Wtildei_1foodplusenergy_never_c(const arma::cube& Wtildei,const a
         arma::mat w = Wtildei.slice(kk);
 
         qq = (w.col(jj) - (Xtildei.slice(jj) * beta.col(jj)) - Utildei.col(jj));
-
+        // std::cout << "C1 initial" << C1 <<std::endl;
+        // std::cout << "qq" << qq <<std::endl;
         C1 = C1 - (iSigmae(varnum,jj) * qq);
+        // std::cout << "iSigmae(varnum,jj)" << iSigmae(varnum,jj) <<std::endl;
+        // std::cout << "C1 new" << C1 <<std::endl;
       }
 
     }
     arma::vec mu      = C2 * C1;
     double sigma   = sqrt(C2);
+    // std::cout << "mu" << mu <<std::endl;
+    // std::cout << "sigma" << sigma <<std::endl;
+    arma::mat check = arma::randn(n,1);
+    // std::cout << "X" << check <<std::endl;
+    // std::cout << "mu + sigma*X" << mu + (sigma * check) <<std::endl;
     //arma::mat w = Wtildeinew.slice(kk);
     Wtildeinew(arma::span::all,arma::span(varnum),arma::span(kk)) = mu + (sigma * arma::randn(n,1));
   }
@@ -225,6 +253,7 @@ double formGofSigmae_never_c(const double r, const double theta, const double s2
   arma::mat A = arma::diagmat(v);
 
   arma::mat Sigmae  = A * R * A;
+  std::cout << "C function Sigmae" << Sigmae <<std::endl;
   arma::mat iSigmae = inv(Sigmae);
 
   arma::mat tempMat(qq.n_cols,qq.n_cols);
@@ -322,7 +351,8 @@ double updated_parameter_s22_never_c(const double r, const double theta, const d
   double a, d, ss, s22new;
   double s22curr       = s22;
   double  s22cand       = s22 + (0.4 * (arma::randu<double>() - 0.5));
-
+  
+  std::cout<<"S22curr"<< s22curr << "s22cand" <<s22cand<<std::endl;
   double GofSigmaecurr = formGofSigmae_never_c(r,theta,s22curr,s33,qq,mmi);
   double GofSigmaecand = formGofSigmae_never_c(r,theta,s22cand,s33,qq,mmi);
 

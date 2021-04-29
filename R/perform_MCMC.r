@@ -30,7 +30,7 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     ###########################################################################
     # Update Ni. You create this for everyone.
     ###########################################################################
-    update_Ni <- update_Ni_with_covariates(Xtildei,beta,Utildei,alpha,
+    update_Ni <- update_Ni_with_covariates_c(Xtildei,beta,Utildei,alpha,
                                             GGalpha,n,mmi,didconsume)
     Ni       <- update_Ni$Ni
     ppi      <- update_Ni$ppi
@@ -74,17 +74,17 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     # Update iSigmae
     ###########################################################################
     #print(paste("iteration", i))
-    rnew   <- updated_parameter_r_never(r,theta,s22,s33,qq,mmi,n)
+    rnew   <- updated_parameter_r_never_c(r,theta,s22,s33,qq,mmi,n)
     (r        <- rnew)
     #print(paste("iteration", i))
     #print(paste("r = ",r))
-    thetanew <- updated_parameter_theta_never(r,theta,s22,s33,qq,mmi)
+    thetanew <- updated_parameter_theta_never_c(r,theta,s22,s33,qq,mmi)
     (theta    <- thetanew)
     #print(paste("theta = ",theta))
-    s22new   <- updated_parameter_s22_never(r,theta,s22,s33,qq,mmi,n)
+    s22new   <- updated_parameter_s22_never_c(r,theta,s22,s33,qq,mmi,n)
     (s22      <- s22new)
     #print(paste("s22 = ",s22))
-    s33new   <- updated_parameter_s33_never(r,theta,s22,s33,qq,mmi,n)
+    s33new   <- updated_parameter_s33_never_c(r,theta,s22,s33,qq,mmi,n)
     (s33      <- s33new)
     #print(paste("s33 = ",33))
 
@@ -102,7 +102,7 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     # Update iSigmaU
     ###########################################################################
     
-    update_sig <- update_iSigmau(Sigmau, prior_Sigmau_doff,
+    update_sig <- update_iSigmau_c(Sigmau, prior_Sigmau_doff,
                                    prior_Sigmau_mean,Utildei,n,jjMCMC)
 
     Sigmau_new  <- update_sig$Sigmau_new
@@ -119,7 +119,7 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     ###########################################################################
     #print(iSigmae)
     #print(iSigmau)
-    Utildei_new <- update_Utildei(Utildei,beta,Wtildei,iSigmae,
+    Utildei_new <- update_Utildei_c(Utildei,beta,Wtildei,iSigmae,
                                  Ni,isnever,didconsume,Xtildei,mmi,iSigmau,n)
     Utildei     <- Utildei_new
     
@@ -128,11 +128,11 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     # Update beta1 using a Metropolis Step.
     ###########################################################################
       if (rw_ind == 1) {
-      beta1 <- update_beta1_with_prior_mean_random_walk(Xtildei,mmi,
+      beta1 <- update_beta1_with_prior_mean_random_walk_c(Xtildei,mmi,
                                                           prior_beta_mean, prior_beta_cov,beta,Wtildei, Utildei,
                                                           iSigmae,isnever,update_beta1_var_ind)
     } else {
-      beta1 <- update_beta1_with_prior_mean(Xtildei,mmi,prior_beta_mean,
+      beta1 <- update_beta1_with_prior_mean_c(Xtildei,mmi,prior_beta_mean,
                                               prior_beta_cov,beta,Wtildei, Utildei,iSigmae,isnever,
                                               update_beta1_var_ind)
     }
@@ -143,14 +143,14 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     ###########################################################################
     # Update beta2. This does not need a Metropolis step
     ###########################################################################
-    beta2 <- update_beta2_with_prior_mean(Xtildei,mmi, prior_beta_mean,
+    beta2 <- update_beta2_with_prior_mean_c(Xtildei,mmi, prior_beta_mean,
                                             prior_beta_cov,beta,Wtildei, Utildei,iSigmae)
     beta[ , 2]  <- beta2
    
     ###########################################################################
     # Update beta2. This does not need a Metropolis step
     ###########################################################################
-    beta3 <- update_beta3_with_prior_mean(Xtildei,mmi, prior_beta_mean,
+    beta3 <- update_beta3_with_prior_mean_c(Xtildei,mmi, prior_beta_mean,
                                             prior_beta_cov,beta,Wtildei, Utildei,iSigmae)
     beta[ ,3]  <- beta3
     
