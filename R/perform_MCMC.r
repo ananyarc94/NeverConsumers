@@ -186,15 +186,15 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     uuindex <- as.numeric(Ni > 0)
     nindex <- sum(uuindex)
     Utildei1 <- pracma::randn(n,pracma::size(Sigmau,2)) %*% pracma::sqrtm(Sigmau)$B
-    temp <- backtransform(as.numeric(lambda_rec_food), Xtildei[uuindex == 1, ,2],
+    temp <- backtransform_c(as.numeric(lambda_rec_food), Xtildei[uuindex == 1, ,2],
                                beta[ ,2], sqrt(Sigmae[2,2]), mumu, sigsig,
                                Utildei1[uuindex == 1,2], nindex)
     temp[temp < a0_food] <- a0_food
     #print("Done upto usual_intake_food")
-    temp <- temp * pnorm(Xtildei[uuindex, ,1] %*% beta[ ,1]
-                            + Utildei1[uuindex,1])# get usual intake (n*1), eq A.2
+    temp <- temp * pnorm(Xtildei[uuindex == 1, ,1] %*% beta[ ,1]
+                            + Utildei1[uuindex == 1,1])# get usual intake (n*1), eq A.2
     usual_intake_food <- as.vector(temp)
-    temp <- backtransform(as.numeric(lambda_rec_energy), Xtildei[uuindex == 1, ,3],
+    temp <- backtransform_c(as.numeric(lambda_rec_energy), Xtildei[uuindex == 1, ,3],
                                beta[ ,3], sqrt(Sigmae[3,3]), mu_e, sig_e, Utildei1[uuindex == 1,3],
                                nindex)
     temp[temp < a0_energy] <- a0_energy
