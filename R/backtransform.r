@@ -15,14 +15,21 @@ backtransform<- function(lambda,Xtildei_1,beta_1,sigmae_1,mumu,sigsig,Utildei_1,
 x <- c(-2.1,-1.3,-0.8,-0.5, 0.00, 0.5, 0.8, 1.3, 2.1)
 w <- c(0.063345, 0.080255, 0.070458, 0.159698, 0.252489,0.159698,
        0.070458, 0.080255, 0.063345)
-
-    temp <- (pracma::repmat(Xtildei_1 %*% beta_1 + as.matrix(Utildei_1), 1,pracma::size(x,2))
+    temp <- (pracma::repmat(Xtildei_1 %*% beta_1 + Utildei_1, 1,pracma::size(x,2))
         +  pracma::repmat(x, n, 1) * sqrt(2) * sigmae_1)# get the terms in the innermost parentheses
     temp <-  (mumu + sigsig * temp / sqrt(2))# de-standardize
-    temp <- MASS::ginv(temp,lambda)
+    temp <- ginverse(temp,lambda)
 
-    temp <- colSums(t(pracma::repmat(w,n,1))*temp)#get n*1 vector,  eq A.5
+    temp <- rowSums(pracma::repmat(w,n,1)*temp)#get n*1 vector,  eq A.5
 
     return(temp)
 
- }
+}
+
+
+# Xtildei_1 = Xtildei[uuindex == 1, ,2]
+# sigmae_1 =  sqrt(Sigmae[2,2])
+# beta_1 = beta[ ,2]
+# Utildei_1 = Utildei1[uuindex == 1,2]
+# n = nindex    
+# lambda = lambda_rec_food
