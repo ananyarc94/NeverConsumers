@@ -6,6 +6,17 @@
 
 using namespace Rcpp;
 
+// timesTwo
+int timesTwo(int x);
+RcppExport SEXP _NeverConsumersR_timesTwo(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(timesTwo(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // mod
 /*  * Extend division reminder to vectors  *  * @param   a       Dividend   * @param   n       Divisor  */ double mod(double a, int n);
 RcppExport SEXP _NeverConsumersR_mod(SEXP aSEXP, SEXP nSEXP) {
@@ -19,12 +30,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // gen_truncated_normals_never_c
-arma::vec gen_truncated_normals_never_c(const arma::vec& trunc_value, const arma::mat& startxi, double numgen);
+arma::mat gen_truncated_normals_never_c(const arma::mat& trunc_value, const arma::mat& startxi, double numgen);
 RcppExport SEXP _NeverConsumersR_gen_truncated_normals_never_c(SEXP trunc_valueSEXP, SEXP startxiSEXP, SEXP numgenSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type trunc_value(trunc_valueSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type trunc_value(trunc_valueSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type startxi(startxiSEXP);
     Rcpp::traits::input_parameter< double >::type numgen(numgenSEXP);
     rcpp_result_gen = Rcpp::wrap(gen_truncated_normals_never_c(trunc_value, startxi, numgen));
@@ -309,6 +320,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_NeverConsumersR_timesTwo", (DL_FUNC) &_NeverConsumersR_timesTwo, 1},
     {"_NeverConsumersR_mod", (DL_FUNC) &_NeverConsumersR_mod, 2},
     {"_NeverConsumersR_gen_truncated_normals_never_c", (DL_FUNC) &_NeverConsumersR_gen_truncated_normals_never_c, 3},
     {"_NeverConsumersR_update_Ni_with_covariates_c", (DL_FUNC) &_NeverConsumersR_update_Ni_with_covariates_c, 8},
