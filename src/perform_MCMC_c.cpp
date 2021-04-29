@@ -123,9 +123,15 @@ Rcpp::List update_Ni_with_covariates_c(const arma::cube& Xtildei,const arma::mat
                                        const arma::mat& GGalpha,const double n,
                                        const double mmi,const arma::vec& didconsume){
 
-  arma::mat  tt = (Xtildei.slice(1) * beta.col(1)) + Utildei.col(1);
+  arma::mat  tt = (Xtildei.slice(0) * beta.col(0)) + Utildei.col(0);
+  //std::cout << "Xtildei.slice(1)" << Xtildei.slice(1) <<std::endl;
+  //std::cout << "beta.col(1)" << beta.col(1) <<std::endl;
+  //std::cout << "Xtildei.slice(1)" << Xtildei.slice(1) <<std::endl;
+  //std::cout << "tt" << tt <<std::endl;
   arma::mat aq1 = arma::normcdf(tt,0,1);
   arma::mat aq2 = arma::normcdf(GGalpha*alpha,0,1);
+  //std::cout << "aq1" << aq1 <<std::endl;
+  //std::cout << "aq2" << aq2 <<std::endl;
   arma::mat denom = arma::zeros(aq2.n_rows,1);
   arma::mat midterm(n,1);
   for(int i=0;i<aq2.n_rows;i++){
@@ -133,6 +139,7 @@ Rcpp::List update_Ni_with_covariates_c(const arma::cube& Xtildei,const arma::mat
     midterm(i,0) = std::pow((1 - aq1(i,0)), mmi);
     }
   arma::mat cc1 = aq2 % midterm % denom;
+  //std::cout << "CC1" << cc1 <<std::endl;
   arma::mat onemat = arma::ones(n,1);
   arma::mat ppi(cc1.n_rows, 1) ;
   for(int i = 0; i<cc1.n_rows; i++){
@@ -140,6 +147,7 @@ Rcpp::List update_Ni_with_covariates_c(const arma::cube& Xtildei,const arma::mat
     }
   arma::mat Ni = arma::zeros(n,1);
   arma::mat kk = GGalpha * alpha;
+  //std::cout << "kk" << kk <<std::endl;
   arma::mat genww1  = gen_truncated_normals_never_c(-kk,-kk % arma::ones(n,1),50.0);
   arma::mat genww2  = gen_truncated_normals_never_c(kk,-kk % arma::ones(n,1),50.0);
 
@@ -253,7 +261,7 @@ double formGofSigmae_never_c(const double r, const double theta, const double s2
   arma::mat A = arma::diagmat(v);
 
   arma::mat Sigmae  = A * R * A;
-  std::cout << "C function Sigmae" << Sigmae <<std::endl;
+  //std::cout << "C function Sigmae" << Sigmae <<std::endl;
   arma::mat iSigmae = inv(Sigmae);
 
   arma::mat tempMat(qq.n_cols,qq.n_cols);
@@ -276,7 +284,7 @@ double updated_parameter_r_never_c(const double r, const double theta, const dou
   // theta = current value
   // s22 = current value
   // s33 = current value
-  double rcurr, rcand, ss, ss1, rnew, a, b, c, d;
+  double rcurr, rcand, ss, ss1, rnew, a, b, c, d, i;
 
   rcurr = r;
   arma::vec  rpossible = arma::linspace(-0.99, 0.99, 41);
@@ -309,19 +317,22 @@ double updated_parameter_r_never_c(const double r, const double theta, const dou
   }
 
   if (rcurr == -0.99){
-
+    i = 1.0;
     rcand = (rcurr * a) + ((rcurr + spacing) *b) + ((rcurr + (2 * spacing)) *c);
-
+   //std::cout << "this is ss:" << ss << " when rcurr = "<< rcurr << " and rcand = " << rcand << " and spacing = "<< spacing<< " and i = "<< i <<std::endl;
 
   }
   if (rcurr == 0.99){
-
+   i = 2.0;
     rcand = (rcurr * a) + ((rcurr - spacing)*b) + ((rcurr - (2 * spacing)) * c);
+    //std::cout << "this is ss:" << ss << " when rcurr = "<< rcurr << " and rcand = " << rcand << " and spacing = "<< spacing<< " and i = "<< i <<std::endl;
+    
   }
   if (rcurr > -0.99 && rcurr < 0.99){
-
+    i = 3.0;
     rcand = (rcurr * a) + ((rcurr + spacing)*b) + ((rcurr - spacing) * c);
-
+    //std::cout << "this is ss:" << ss << " when rcurr = "<< rcurr << " and rcand = " << rcand << " and spacing = "<< spacing<< " and i = "<< i <<std::endl;
+    
   }
 
   double GofSigmaecurr = formGofSigmae_never_c(rcurr,theta,s22,s33,qq,mmi);
@@ -335,8 +346,12 @@ double updated_parameter_r_never_c(const double r, const double theta, const dou
 
   if(ss1 < gg){
     d = 1;
-  }
+  }else{
+    d = 0;
+    }
   rnew          = (rcand * d) + ((rcurr * (1 - d)));
+  //std::cout << "this is ss1 = " << ss1 << " when gg = "<< gg << " then rnew = " << rnew <<std::endl;
+  
   return(rnew);
 }
 
@@ -352,27 +367,30 @@ double updated_parameter_s22_never_c(const double r, const double theta, const d
   double s22curr       = s22;
   double  s22cand       = s22 + (0.4 * (arma::randu<double>() - 0.5));
   
-  std::cout<<"S22curr"<< s22curr << "s22cand" <<s22cand<<std::endl;
+  //std::cout<<"S22curr = "<< s22curr << " and s22cand = " <<s22cand<<std::endl;
   double GofSigmaecurr = formGofSigmae_never_c(r,theta,s22curr,s33,qq,mmi);
   double GofSigmaecand = formGofSigmae_never_c(r,theta,s22cand,s33,qq,mmi);
 
   double  gg            = GofSigmaecand - GofSigmaecurr;
   gg            = gg - ((mmi*n/2) * log(s22cand)) + ((mmi*n/2) * log(s22curr));
-
+  //std::cout<<"gg initial = "<< gg <<std::endl;
   if(s22cand>=0 && s22cand<=3){
     a = 1;
   }else{
     a = 0;
   }
   gg            = std::min(1.0, exp(gg)*a);
-
   ss            = arma::randu<double>();
+  // std::cout<<"gg final = "<< gg << " and ss = " <<ss <<std::endl;
   if(ss < gg){
     d = 1;
-  }
+  }else{
+    d = 0;
+    }
   s22new       = (s22cand * d) +  (s22curr * (1 - d));
+  // std::cout << "s22new = "<< s22new <<std::endl;
 
-  return(abs(s22new));
+  return(s22new);
 
 }
 
@@ -388,11 +406,15 @@ double updated_parameter_s33_never_c(const double r, const double theta, const d
   double a, d, ss, s33new;
   double s33curr       = s33;
   double s33cand       = s33 + (0.4 * (arma::randu<double>() - 0.5));
+  //std::cout<<"S33curr = "<< s33curr << " and s33cand = " <<s33cand<<std::endl;
+  
   double GofSigmaecurr = formGofSigmae_never_c(r,theta,s22,s33curr,qq,mmi);
   double GofSigmaecand = formGofSigmae_never_c(r,theta,s22,s33cand,qq,mmi);
 
   double gg            = GofSigmaecand - GofSigmaecurr;
   gg            = gg - ((mmi*n/2) * log(s33cand)) + ((mmi*n/2) * log(s33curr));
+  //std::cout<<"gg initial = "<< gg <<std::endl;
+  
   if(s33cand>=0 && s33cand<=3){
     a = 1;
   }else{
@@ -402,11 +424,15 @@ double updated_parameter_s33_never_c(const double r, const double theta, const d
   gg            = std::min(1.0, exp(gg)*a);
 
   ss            = arma::randu<double>();
+  
+  //std::cout<<"gg final = "<< gg << " and ss = " <<ss <<std::endl;
   if(ss < gg){
     d = 1;
-  }
+  }else{
+    d = 0;
+    }
   s33new       = (s33cand * d) +  (s33curr * (1-d));
-
+  //std::cout << "s33new = "<< s33new <<std::endl;
   return(abs(s33new));
 
 }
@@ -471,7 +497,9 @@ double updated_parameter_theta_never_c(const double r, const double theta, const
   ss            = arma::randu<double>();
   if(ss < gg){
     d = 1;
-  }
+  }else{
+    d = 0;
+    }
   double thetanew      = (thetacand * d) + (thetacurr * (1-d));
 
   return(thetanew);
@@ -479,22 +507,25 @@ double updated_parameter_theta_never_c(const double r, const double theta, const
 
 // [[Rcpp::export]]
 Rcpp::List update_iSigmau_c(const arma::mat& Sigmau,const double prior_Sigmau_doff,
-                            const arma::mat& prior_Sigmau_mean,const arma::mat& Utildei,const double n, double jjMCMC){
+                            const arma::mat& prior_Sigmau_mean,const arma::mat& Utildei,
+                            const double n, double jjMCMC){
 
-  arma::mat aa   = ( (prior_Sigmau_doff-Sigmau.n_rows - 1) * prior_Sigmau_mean) +
+  arma::mat aa  = ( (prior_Sigmau_doff - Sigmau.n_rows - 1) * prior_Sigmau_mean) +
     (Utildei.t() * Utildei);
   double      bb         = prior_Sigmau_doff + n;
 
-  //std::cout<<aa<<std::endl;
-  //std::cout<<bb<<std::endl;
-  
+  // std::cout<<aa<<std::endl;
+  // std::cout<<bb<<std::endl;
+  // 
   aa  = aa + (.00001 * (1 * n) * arma::eye(3, 3));
   bb  = bb + (.00001 * (1 * n));
   aa  = (aa + aa.t()) / (2);
-
+  // std::cout<<aa<<std::endl;
+  // std::cout<<bb<<std::endl;
+  
 
   arma::vec eigval = arma::eig_sym(aa/bb);
-  double thecount2 = 0;
+  double thecount2 = 0.0;
   
   //std::cout<<aa<<std::endl;
   //std::cout<<eigval<<std::endl;
@@ -556,22 +587,32 @@ arma::mat update_Utildei_c(arma::mat& Utildei,const arma::mat& beta,
     y.slice(i) = qq;
   }
   arma::cube  ss = Wtildei - y;
-
+  //std::cout << "ss" << ss << std::endl;
+  
   arma::mat f = arma::sum(ss, 2);
+  //std::cout << "f" << f << std::endl;
+  
   arma::mat c1  = arma::trans(iSigmae * arma::trans(f));
+  //std::cout << "c1" << c1 << std::endl;
   arma::mat c2  = inv(iSigmau + (mmi * iSigmae));
   // std::cout<<"iSigmau"<<iSigmau<<std::endl;
   // std::cout<<"iSigmae"<<iSigmae<<std::endl;
+  // std::cout << "c2" << c2 << std::endl;
+  // 
   // // Here is Step 2
 
   //c2 = (c2 + arma::trans(c2))/2;
-  std::cout<<"c2 Utildei"<<std::endl;
-  std::cout<<c2<<std::endl;
+  //std::cout<< "(c2+ c2')/2 = " << c2 << std::endl;
   arma::mat g = arma::sqrtmat_sympd(c2);
+  arma::vec  one_vec = arma::ones(n);
+  //std::cout << "g = " << g << std::endl;
   Utildei = (c2 * c1.t()).t() + (arma::randn(n,3) * g);
-  arma::vec c2_cand = 1 / ( arma::pow(1 - arma::normcdf(qq.col(1) + Utildei.col(1)), mmi));
-  arma::vec c2_curr = 1 / ( arma::pow(1 - arma::normcdf(qq.col(1) + Utildei_Current.col(1)), mmi));
-
+  arma::vec c2_cand = 1 / ( arma::pow(one_vec - arma::normcdf(qq.col(0) + Utildei.col(0)), mmi));
+  arma::vec c2_curr = 1 / ( arma::pow(one_vec - arma::normcdf(qq.col(0) + Utildei_Current.col(0)), mmi));
+  
+  // std::cout << "1/c2_cand" << ( arma::pow(1 - arma::normcdf(qq.col(0) + Utildei.col(0)), mmi)) <<std::endl;
+  // std::cout << "c2_cand" << c2_cand <<std::endl;
+  
   arma::vec uu = arma::randu(n);
   int p = c2_cand.n_rows;
   arma::vec rri(p);
@@ -584,20 +625,29 @@ arma::mat update_Utildei_c(arma::mat& Utildei,const arma::mat& beta,
 
   }
 
-
+  arma::vec  one = arma::ones(p);
   double ddff       = Utildei.n_cols;
-  arma::mat Utildei_MH = (Utildei % (rri * arma::ones(1,ddff)) ) + (Utildei_Current % ((1 - rri) * arma::ones(1,ddff)));
+  arma::mat Utildei_MH = (Utildei % (rri * arma::ones(1,ddff)) ) +
+                          (Utildei_Current % ((one - rri) * arma::ones(1,ddff)));
 
-  arma::mat Utildei_new = (Utildei % ((1 - isnever) * arma::ones(1,ddff))) + (Utildei_MH % (isnever * arma::ones(1,ddff)));
+  arma::mat Utildei_new = (Utildei % ((one - isnever) * arma::ones(1,ddff))) + 
+                          (Utildei_MH % (isnever * arma::ones(1,ddff)));
 
   return(Utildei_new);
 }
 
 
 // [[Rcpp::export]]
-arma::colvec update_beta1_with_prior_mean_random_walk_c(const arma::cube& Xtildei, const double mmi, const arma::mat& prior_beta_mean,
-                                                        const arma::cube prior_beta_cov, const arma::mat& beta, const arma::cube& Wtildei, const arma::mat& Utildei,
-                                                        const arma::mat& iSigmae, const arma::vec& isnever, const double update_beta1_var_ind){
+arma::colvec update_beta1_with_prior_mean_random_walk_c(const arma::cube& Xtildei, 
+                                                        const double mmi,
+                                                        const arma::mat& prior_beta_mean,
+                                                        const arma::cube prior_beta_cov, 
+                                                        const arma::mat& beta,
+                                                        const arma::cube& Wtildei, 
+                                                        const arma::mat& Utildei,
+                                                        const arma::mat& iSigmae, 
+                                                        const arma::vec& isnever, 
+                                                        const double update_beta1_var_ind){
 
   arma::mat xx         = Xtildei.slice(0);
   arma::mat cc2        = inv(inv(prior_beta_cov.slice(0)) + (mmi * iSigmae(0,0) * (xx.t() * xx)));
@@ -607,36 +657,50 @@ arma::colvec update_beta1_with_prior_mean_random_walk_c(const arma::cube& Xtilde
   for( int jji=0; jji< mmi; jji ++){
     arma::mat w = Wtildei.slice(jji);
     cc1    = cc1 + (iSigmae(0,0)*(xx.t() * (w.col(0) - Utildei.col(0))));
-    cc1    = cc1 + (iSigmae(0,1)*(xx.t() * (w.col(1) - Utildei.col(1))));
-    cc1    = cc1 + (iSigmae(0,2)*(xx.t() * (w.col(2) - Utildei.col(2))));
+    cc1    = cc1 + (iSigmae(0,1)*(xx.t() * (w.col(1) - (xx * beta.col(1)) - Utildei.col(1))));
+    cc1    = cc1 + (iSigmae(0,2)*(xx.t() * (w.col(2) - (xx * beta.col(2)) - Utildei.col(2))));
   }
 
   arma::vec beta1_curr = beta.col(0);
   cc2 = (cc2 + cc2.t())/2;
-  //std::cout<<"C2 beta1"<<std::endl;
-  //std::cout<<cc2<<std::endl;
+  // std::cout<<"cc2 = "<< cc2 << std::endl;
+  //std::cout<<"cc2/update_beta1_var_ind = " << cc2/update_beta1_var_ind<<std::endl;
   arma::mat t = arma::sqrtmat_sympd(cc2/update_beta1_var_ind);
-  arma::vec beta1_cand = beta1_curr + (t * arma::randn(mmbeta,1));
+  //std::cout<< "t = " << t << std::endl;
+  arma::mat random = arma::randn(mmbeta,1);
+  //std::cout<< "random = " << random << std::endl;
+  //std::cout<< "t * random = " << t * random << std::endl;
+  arma::vec beta1_cand = beta1_curr + (t * random);
+  //std::cout<< "beta1_cand = " << beta1_cand << std::endl;
+  //std::cout<< "beta1_curr = " << beta1_curr << std::endl;
   double n = xx.n_rows;
   arma::vec  v = arma::ones(n);
-  double lc2_cand   = -mmi * sum(arma::find_finite(isnever % log((v - arma::normcdf((xx * beta1_cand) + Utildei.col(0))))));
-  double lc2_curr   = -mmi * sum(arma::find_finite(isnever % log((v - arma::normcdf((xx * beta1_curr) + Utildei.col(0))))));
-
+ 
+  double lc2_cand   = -mmi * sum((isnever % log((v - arma::normcdf((xx * beta1_cand) + Utildei.col(0))))));
+  double lc2_curr   = -mmi * sum((isnever % log((v - arma::normcdf((xx * beta1_curr) + Utildei.col(0))))));
+  // std::cout <<"cc1 size" << cc1.n_rows << "times" << cc1.n_cols << std::endl;
+  // std::cout <<"beta1 size" << beta1_cand.n_rows << "times" << beta1_cand.n_cols << std::endl;
   arma::mat lc1_cand   = cc1.t() * beta1_cand - beta1_cand.t() * inv(cc2) * beta1_cand /2;
   arma::mat lc1_curr   = cc1.t() * beta1_curr - beta1_curr.t() * inv(cc2) * beta1_curr /2;
-
+  //std::cout <<"Check 1" << std::endl;
+  // std::cout << "lc1_cand" << lc1_cand << std::endl;
+  // std::cout << "lc1_cand size = " << lc1_cand.n_rows<<"times"<<lc1_cand.n_cols << std::endl;
   arma::mat A(1,1);
   A.ones();
   arma::mat gghh       = arma::min(A ,exp( lc1_cand + lc2_cand - lc1_curr - lc2_curr));
-
+  // std::cout << "lc1_cand = "<< lc1_cand << " lc2_cand = "<< lc2_cand << " lc1_curr = " << lc1_curr << " lc2_curr = "<<lc2_curr << std::endl;
+  // std::cout << "lc1_cand + lc2_cand - lc1_curr - lc2_curr" << lc1_cand + lc2_cand - lc1_curr - lc2_curr << std::endl;
+  // std::cout<< "exp(lc1_cand + lc2_cand - lc1_curr - lc2_curr) = " << exp(lc1_cand + lc2_cand - lc1_curr - lc2_curr)<<std::endl;
+  // std::cout << "gghh" << gghh <<  std::endl;
   arma::mat ss(1,1);
   ss(0,0)            = arma::randu<double>();
-  double rri;
+  arma::vec rri(beta1_cand.n_elem);
   if(ss(0,0) < gghh(0,0)){
-    rri = 1;
-  }
-
-  arma::vec beta1      = (beta1_cand * rri) + (beta1_curr * (1 - rri));
+    rri = arma::ones(beta1_cand.n_elem);
+  }else{
+    rri = arma::zeros(beta1_cand.n_elem);}
+  arma::vec  one = arma::ones(beta.n_rows);
+  arma::vec beta1      = (beta1_cand % rri) + (beta1_curr % (one - rri));
 
   return(beta1);
 
@@ -662,15 +726,15 @@ arma::colvec update_beta1_with_prior_mean_c(const arma::cube& Xtildei, const dou
   // # iSigmae        = the 2x2 inverse of Sigmae. iSigmae(1,1) = 1
   arma::mat xx         = Xtildei.slice(0);
   arma::mat cc2        = arma::inv(arma::inv(prior_beta_cov.slice(0)) +
-    (mmi * iSigmae(0,0) * (arma::trans(xx)* xx)));
+    (mmi * iSigmae(0,0) * (xx.t()* xx)));
   double mmbeta     = beta.n_rows;
   arma::mat cc1        = arma::zeros(mmbeta,1);
   cc1        = cc1 + (arma::inv(prior_beta_cov.slice(0)) * prior_beta_mean.col(0));
   for (int jji = 0; jji< mmi; jji++){
     arma::mat w = Wtildei.slice(jji);
     cc1    = cc1 + (iSigmae(0,0)*(xx.t() * (w.col(0) - Utildei.col(0))));
-    cc1    = cc1 + (iSigmae(0,1)*(xx.t() * (w.col(1) - Utildei.col(1))));
-    cc1    = cc1 + (iSigmae(0,2)*(xx.t() * (w.col(2) - Utildei.col(2))));
+    cc1    = cc1 + (iSigmae(0,1)*(xx.t() * (w.col(1) - (xx * beta.col(1)) - Utildei.col(1))));
+    cc1    = cc1 + (iSigmae(0,2)*(xx.t() * (w.col(2) - (xx * beta.col(2)) - Utildei.col(2))));
   }
   //cc2 = (cc2 + cc2.t())/2;
   arma::mat t = arma::sqrtmat_sympd(cc2/update_beta1_var_ind);
@@ -678,9 +742,8 @@ arma::colvec update_beta1_with_prior_mean_c(const arma::cube& Xtildei, const dou
   arma::vec  beta1_curr = beta.col(0);
   double n = xx.n_rows;
   arma::vec  v = arma::ones(n);
-  double lc2_cand   = -mmi * sum(arma::find_finite(isnever %log((1 - arma::normcdf((xx * beta1_cand) + Utildei.col(0))))));
-  double lc2_curr   = -mmi * sum(arma::find_finite(isnever %
-                                 log((1 - arma::normcdf((xx* beta1_curr) + Utildei.col(0))))));
+  double lc2_cand   = -mmi * sum((isnever %log((v - arma::normcdf((xx * beta1_cand) + Utildei.col(0))))));
+  double lc2_curr   = -mmi * sum((isnever %log((v - arma::normcdf((xx* beta1_curr) + Utildei.col(0))))));
   arma::mat lc1_cand   = cc1.t() * beta1_cand - beta1_cand.t() * inv(cc2) * beta1_cand /2;
   arma::mat lc1_curr   = cc1.t() * beta1_curr - beta1_curr.t() * inv(cc2) * beta1_curr /2;
 
@@ -692,11 +755,13 @@ arma::colvec update_beta1_with_prior_mean_c(const arma::cube& Xtildei, const dou
 
   arma::mat ss(1,1);
   ss(0,0)            = arma::randu<double>();
-  double rri;
+  arma::vec rri(beta.n_rows);
   if(ss(0,0) < gghh(0,0)){
-    rri = 1;
-  }
-  arma::colvec beta1      = (beta1_cand * rri) + (beta1_curr * (1 - rri));
+    rri = arma::ones(beta.n_rows);
+  }else{
+    rri = arma::zeros(beta.n_rows);}
+  arma::vec  one = arma::ones(beta.n_rows);
+  arma::colvec beta1      = (beta1_cand % rri) + (beta1_curr % (one - rri));
 
   return(beta1);
 
@@ -725,7 +790,7 @@ arma::colvec update_beta2_with_prior_mean_c(const arma::cube& Xtildei, const dou
   // % iSigmae        = the 2x2 inverse of Sigmae. iSigmae(1,1) = 1
 
   arma::mat xx         = Xtildei.slice(0);
-  arma::mat cc2        = inv(inv(prior_beta_cov.slice(0)) + (mmi * iSigmae(0,0) * (xx.t() * xx)));
+  arma::mat cc2        = inv(inv(prior_beta_cov.slice(1)) + (mmi * iSigmae(1,1) * (xx.t() * xx)));
   double mmbeta        = beta.n_rows;
   arma::mat cc1        = arma::zeros(mmbeta,1);
   cc1        = cc1 + (inv(prior_beta_cov.slice(1)) * prior_beta_mean.col(1));
