@@ -9,8 +9,8 @@ updated_parameter_s33_never <- function(r,theta,s22,s33,qq,mmi,n){
 
 s33curr       <- s33
 s33cand       <- s33 + (0.4 * (runif(1) - 0.5))
-GofSigmaecurr = formGofSigmae_never_c(r,theta,s22,s33curr,qq,mmi)
-GofSigmaecand = formGofSigmae_never_c(r,theta,s22,s33cand,qq,mmi)
+GofSigmaecurr = formGofSigmae_never(r,theta,s22,s33curr,qq,mmi)
+GofSigmaecand = formGofSigmae_never(r,theta,s22,s33cand,qq,mmi)
 
 gg            <- GofSigmaecand - GofSigmaecurr
 gg            <- gg - ((mmi*n/2) * log(s33cand)) + ((mmi*n/2) * log(s33curr))
@@ -22,3 +22,15 @@ return(s33new)
 
 }
 
+# s33_r = vector()
+# s33_c = vector()
+# 
+# for(i in 1:10000){
+#   s33_r[i] = updated_parameter_s22_never(r,theta,s22,s33,qq,mmi,n)
+#   s33_c[i] = updated_parameter_s22_never_c(r,theta,s22,s33,qq,mmi,n)
+# }
+# 
+# mean(s33_r)
+# mean(s33_c)
+# 
+# data.frame(s33_r, s33_c)
