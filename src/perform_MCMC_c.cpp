@@ -20,7 +20,7 @@ timesTwo(42)
  * @param   a       Dividend 
  * @param   n       Divisor
  */
-double mod(double a, int n)
+double mod(double a, double n)
 {
   return a - std::floor(a/n)*n;
 }   
@@ -200,13 +200,14 @@ arma::cube gen_Wtildei_1foodplusenergy_never_c(const arma::cube& Wtildei,const a
     arma::vec mu      = C2 * C1;
     double sigma   = sqrt(C2);
     arma::vec startxi = mu/sigma;
-    // std::cout << "mu" << mu <<std::endl;
-    // std::cout << "sigma" << sigma <<std::endl;
+    //std::cout << "mu" << mu <<std::endl;
+    //std::cout << "sigma" << sigma <<std::endl;
     // std::cout << "startxi" << startxi <<std::endl;
     arma::vec genww1  = gen_truncated_normals_never_c(-mu/sigma,-startxi,numgen);
     arma::vec genww2  = gen_truncated_normals_never_c(mu/sigma,-startxi,numgen);
     // std::cout << "genww1" << genww1 <<std::endl;
     // std::cout << "genww2" << genww2 <<std::endl;
+    // std::cout << "Wistar" << Wistar <<std::endl;
     //arma::mat w = Wtildeinew.slice(kk);
     Wtildeinew(arma::span::all,arma::span(varnum),arma::span(kk)) = mu + (sigma * ((Wistar.col(kk) % genww1) - ((1 - Wistar.col(kk)) % genww2)));
 
@@ -214,6 +215,7 @@ arma::cube gen_Wtildei_1foodplusenergy_never_c(const arma::cube& Wtildei,const a
 
 
   varnum      = 1;
+  //std::cout << "step 2" <<std::endl;
   for(int kk = 0; kk< mmi; kk++){
     C2      = 1 / iSigmae(varnum,varnum);
     C1      = iSigmae(varnum,varnum) * ((Xtildei.slice(varnum) * beta.col(varnum)) + Utildei.col(varnum));
@@ -223,9 +225,9 @@ arma::cube gen_Wtildei_1foodplusenergy_never_c(const arma::cube& Wtildei,const a
 
         qq = (w.col(jj) - (Xtildei.slice(jj) * beta.col(jj)) - Utildei.col(jj));
         // std::cout << "C1 initial" << C1 <<std::endl;
-        // std::cout << "qq" << qq <<std::endl;
+        //std::cout << "qq" << qq <<std::endl;
         C1 = C1 - (iSigmae(varnum,jj) * qq);
-        // std::cout << "iSigmae(varnum,jj)" << iSigmae(varnum,jj) <<std::endl;
+        //std::cout << "iSigmae(varnum,jj)" << iSigmae(varnum,jj) <<std::endl;
         // std::cout << "C1 new" << C1 <<std::endl;
       }
 
@@ -884,8 +886,8 @@ arma::mat ginverse_c(const arma::mat& z,const double lambda){
 
 
 // [[Rcpp::export]]
-arma::mat backtransform_c(const double lambda,arma::mat& Xtildei,arma::vec& beta,
-                          double sigmae,double mumu,double sigsig,arma::vec& Utildei,double& n){
+arma::mat backtransform_c(const double lambda,arma::mat Xtildei,arma::vec beta,
+                          double sigmae,double mumu,double sigsig,arma::vec Utildei,double& n){
   // # Compute the 9 point backtransformation for any component
   // #
   // # INPUT
@@ -917,246 +919,305 @@ arma::mat backtransform_c(const double lambda,arma::mat& Xtildei,arma::vec& beta
 
 
 
+
+
+// [[Rcpp::export]]
+Rcpp::List perform_MCMC_c(const double nMCMC,const double nthin,const double n, const double mmi,const arma::cube& Xtildei,
+  arma::mat& Utildei,arma::mat& beta,arma::vec& alpha,arma::mat& GGalpha, arma::vec didconsume,
+  arma::mat& prior_alpha_cov, arma::vec& prior_alpha_mean, arma::cube Wtildei,arma::mat& iSigmae,arma::mat& iSigmau,
+  arma::mat& Wistar, double r, double theta,double s22,double s33,arma::mat& Sigmau,arma::mat& Sigmae, arma::mat& prior_Sigmau_mean,
+  double prior_Sigmau_doff, double prior_Sigmae_doff,arma::mat& prior_beta_mean,arma::cube& prior_beta_cov,
+  double update_beta1_var_ind,double lambda_rec_food, double lambda_rec_energy,double mumu,double sigsig,double mu_e,double sig_e,
+  double mdesign,double rw_ind,arma::vec& beta1_accept_count, double a0_food,double a0_energy,double ndist,double ndim){
+
+  std::cout<< "Start the MCMC" << std::endl;
+// ###########################################################################
+// # Initialize the MCMC traces
+// ###########################################################################
+arma::mat  r_trace(nMCMC,1), theta_trace(nMCMC,1), s22_trace(nMCMC,1), s33_trace(nMCMC,1), alpha_trace(nMCMC,GGalpha.n_cols);
+arma::mat never_trace(nMCMC,1), usual_intake_food_trace(n, ndist), usual_intake_energy_trace(n, ndist);
+
+//std::cout<<"Check:1"<<std::endl;
+usual_intake_food_trace.fill(arma::datum::nan);
+usual_intake_energy_trace.fill(arma::datum::nan);
+
+arma::cube Sigmae_trace(3,3,nMCMC), Sigmau_trace(3,3,nMCMC), beta_trace(mdesign,3,nMCMC);
+
+arma::mat temp_mat;
+
+//std::cout<<"Check:2"<<std::endl;
+
+for(int jjMCMC = 0; jjMCMC< nMCMC; jjMCMC ++){
+     if(mod(jjMCMC+1,500) == 0.0){
+       std::cout<< "iteration <- " << jjMCMC + 1 << std::endl;
+     }
 // 
-// 
-// // [[Rcpp::export]]
-// Rcpp::List perform_MCMC_c(const double nMCMC,const double nthin,const double n, const double mmi,const arma::cube& Xtildei,
-//   arma::mat& Utildei,arma::mat& beta,arma::mat& alpha,arma::mat& GGalpha, arma::vec didconsume,
-//   arma::mat& prior_alpha_cov, arma::mat& prior_alpha_mean, arma::cube Wtildei,arma::mat& iSigmae,arma::mat& iSigmau, 
-//   arma::vec& Wistar, double r, double theta,double s22,double s33,arma::mat& Sigmau,arma::mat& Sigmae, arma::mat& prior_Sigmau_mean,
-//   double prior_Sigmau_doff, double prior_Sigmae_doff,arma::mat& prior_beta_mean,arma::cube& prior_beta_cov,
-//   double update_beta1_var_ind,double lambda_rec_food, double lambda_rec_energy,double mumu,double sigsig,double mu_e,double sig_e, 
-//   double mdesign,double rw_ind,arma::vec& beta1_accept_count, double a0_food,double a0_energy,double ndist,double ndim){
-//                                    
-//   std::cout<< "Start the MCMC" << std::endl;
-// // ###########################################################################
-// // # Initialize the MCMC traces
-// // ###########################################################################
-// arma::mat  r_trace(nMCMC,1), theta_trace(nMCMC,1), s22_trace(nMCMC,1), s33_trace(nMCMC,1), alpha_trace(nMCMC,GGalpha.n_cols);
-// arma::mat never_trace(nMCMC,1), usual_intake_food_trace(n, ndist), usual_intake_energy_trace(n, ndist);
-//   
-// std::cout<<"Check:1"<<std::endl;
-// usual_intake_food_trace.fill(arma::datum::nan);  
-// usual_intake_energy_trace.fill(arma::datum::nan);
-// 
-// arma::cube Sigmae_trace(3,3,nMCMC), Sigmau_trace(3,3,nMCMC), beta_trace(mdesign,3,nMCMC);
-// 
-// arma::mat temp_mat;
-// 
-// std::cout<<"Check:2"<<std::endl;
-//   
-// for(double jjMCMC = 0; jjMCMC< nMCMC; jjMCMC ++){
-//     if(mod(jjMCMC,500) == 0.0){
-//       std::cout<< "iteration <- " << jjMCMC<< std::endl;
-//     }
-//     
-// // ###########################################################################
-// // # Update Ni. You create this for everyone.
-// // ###########################################################################
-// 
-// std::cout<<"Check:"<<std::endl;
-// 
-//  Rcpp::List  update_Ni = update_Ni_with_covariates_c(Xtildei,beta,Utildei,alpha,
-//                                             GGalpha,n,mmi,didconsume);
-//  arma::vec     Ni = update_Ni["Ni"];
-//  arma::vec     ppi = update_Ni["ppi"];
-//  arma::vec    isnever(Ni.n_elem);  // Indicator of a never-consumer
-//  for(int i = 0; i < Ni.n_elem; Ni ++){
-//    if(Ni(i)< 0){
-//      isnever(i) = 1;
-//    }else{
-//      isnever(i) = 0;
-//    }
-//  }
+// ###########################################################################
+// # Update Ni. You create this for everyone.
+// ###########################################################################
+//double jjMCMC = 1;
+//std::cout<<"Check:3"<<std::endl;
+
+ Rcpp::List  update_Ni = update_Ni_with_covariates_c(Xtildei,beta,Utildei,alpha,
+                                            GGalpha,n,mmi,didconsume);
+ 
+ 
+ arma::mat     N = update_Ni["Ni"];
+ arma::mat     p = update_Ni["ppi"];
+ //std::cout<<"N = "<< N << std::endl; 
+ arma::vec Ni = N.col(0);
+ arma::vec ppi = p.col(0);
+
+ arma::vec    isnever(Ni.n_elem);  // Indicator of a never-consumer
+ for(int i = 0; i < Ni.n_elem; i ++){
+   if(Ni(i)< 0){
+     isnever(i) = 1;
+   }else{
+     isnever(i) = 0;
+   }
+ }
+//std::cout << "Ni = "<< Ni << std::endl;
 // // ###########################################################################
 // // # Update alpha. In the following, the complete con, ditional for alpha is
 // // # that is a truncated normal from the left at alpha_min, but with mean (cc2
 // // # * cc1) and variance cc2.
 // // ###########################################################################
-//     arma::mat   xx     = Xtildei.slice(1);
-//     double mmnn        =  xx.n_cols;
-//     arma::mat  cc1     = (inv(prior_alpha_cov)*prior_alpha_mean) + GGalpha.t()*Ni;
-//     arma::mat  cc2     = inv(GGalpha.t()*GGalpha + inv(prior_alpha_cov));
-//     arma::mat  mujj    = cc2 % cc1;
-//    // cc2 = (cc2 + cc2.t())/2;
-//     arma::mat sijj     = arma::sqrtmat_sympd(cc2);
-//     arma::mat  alpha   = mujj + sijj*arma::randn(GGalpha.n_cols);
-// // ###########################################################################
-// // # Update W1 and W2
-// // ###########################################################################
-//     double  numgen     = 5;
-//     arma::cube Wtildeinew = gen_Wtildei_1foodplusenergy_never_c(Wtildei,beta,Xtildei,Utildei,n,
-//                                                       iSigmae,Wistar,mmi,numgen);
-//     arma::cube Wtildei    = Wtildeinew;
-// 
-// // ###########################################################################
-// // # Calculate W-XB-U
-// // ###########################################################################
-//     arma::mat  tt(n,ndim);
-//     tt.zeros();
-//         for(int jj = 0; jj < ndim; jj++){
-//           tt.col(jj) = (Xtildei.slice(jj) * beta.col(jj)) + Utildei.col(jj);
-//         }
-// 
-//      arma::cube  y(n, ndim, mmi);
-//         for(int i = 0; i < mmi;i++){
-//             y.slice(i) = tt;
-//           }
-//      arma::cube     qq = Wtildei - y;
-// // ###########################################################################
-// // # Update iSigmae
-// // ###########################################################################
-//              double  rnew    = updated_parameter_r_never_c(r,theta,s22,s33,qq,mmi,n);
-//              double r        = rnew;
-//              double thetanew = updated_parameter_theta_never_c(r,theta,s22,s33,qq,mmi);
-//              double theta    = thetanew;
-//              double s22new   = updated_parameter_s22_never_c(r,theta,s22,s33,qq,mmi,n);
-//              double s22      = s22new;
-//              double s33new   = updated_parameter_s33_never_c(r,theta,s22,s33,qq,mmi,n);
-//              double s33      = s33new;
-// 
-//              arma::mat R = {{1, 0, r*cos(theta)}, 
-//              {0,  1, r*sin(theta)},
-//              {r*cos(theta), r*sin(theta), 1}};
-//              arma::vec v = {1, sqrt(s22), sqrt(s33)};
-//              arma::mat A = arma::diagmat(v);
-//              
-//              arma::mat Sigmae  = A * R * A; 
-//              arma::mat iSigmae = inv(Sigmae);
-// // ###########################################################################
-// // # Update iSigmaU
-// // ###########################################################################
-//             Rcpp::List update_sig = update_iSigmau_c(Sigmau, prior_Sigmau_doff,
-//                                            prior_Sigmau_mean,Utildei,n, jjMCMC);
-// 
-//             arma::mat Sigmau_new  = update_sig["Sigmau_new"];
-//             arma::mat iSigmau_new = update_sig["iSigmau_new"];
-//             arma::mat Sigmau      = Sigmau_new;
-//               arma::mat iSigmau     = iSigmau_new;
-// // ###########################################################################
-// // # Update Utildei. This is done in two steps. In the first step, we generate
-// // # it assuming that everyone is a consumer. In the second step, those who
-// // # are never consumers, i.e., Ni < 0, have their values updated by a
-// // # Metropolis step.
-// // ###########################################################################
-//             arma::mat Utildei_new= update_Utildei_c(Utildei,beta,Wtildei,iSigmae,
-//                                            isnever,didconsume,Xtildei,mmi,iSigmau,n);
-//             Utildei     = Utildei_new;
-// //###########################################################################
-// // # Update beta1 using a Metropolis Step.
-// // ###########################################################################
-//             double p = beta.n_rows;
-//             arma::vec beta1(p), beta2(p), beta3(p);
-//             if (rw_ind == 1){
-//               beta1 = update_beta1_with_prior_mean_random_walk_c(Xtildei,mmi,
-//                                                                   prior_beta_mean, prior_beta_cov,beta,Wtildei, Utildei,
-//                                                                   iSigmae,isnever,update_beta1_var_ind);
-//             } else {
-//               beta1  = update_beta1_with_prior_mean_c(Xtildei,mmi,prior_beta_mean,
-//                                                       prior_beta_cov,beta,Wtildei, Utildei,iSigmae,isnever,
-//                                                       update_beta1_var_ind);
-//             }
-// // count if beta1 moves
-//             arma::uvec accept_count = arma::find(beta1 == beta.col(1));
-//             arma::vec beta1_accept_count = beta1_accept_count + (1 - accept_count);
-//             beta.col(1)  = beta1;
-// // ###########################################################################
-// // # Update beta2. This does not need a Metropolis step
-// // ###########################################################################
-//               beta2 = update_beta2_with_prior_mean_c(Xtildei,mmi, prior_beta_mean,
-//                                                       prior_beta_cov,beta,Wtildei, Utildei,iSigmae);
-//               beta.col(2)  = beta2;
-// // ###########################################################################
-// // # Update beta2. This does not need a Metropolis step
-// // ###########################################################################
-//               beta3 = update_beta3_with_prior_mean_c(Xtildei,mmi, prior_beta_mean,
-//                                                       prior_beta_cov,beta,Wtildei, Utildei,iSigmae);
-//               beta.col(3)  = beta3;
-// //###########################################################################
-// // # Store results
-// // ###########################################################################
-//               Sigmae_trace.slice(jjMCMC) = Sigmae;
-//               Sigmau_trace.slice(jjMCMC) = Sigmau;
-//               beta_trace.slice(jjMCMC)   = beta;
-//               r_trace(jjMCMC,1)          = r;
-//               theta_trace(jjMCMC,1)      = theta;
-//               s22_trace(jjMCMC,1)        = s22;
-//               s33_trace(jjMCMC,1)        = s33;
-//               alpha_trace.row(jjMCMC)      = alpha;
-//               never_trace(jjMCMC,1)      = 1 - arma::accu(arma::normcdf(GGalpha * alpha))/n ;
-// // ###########################################################################
-// // # Compute distribution of usual intake.
-// // # Suppose we have finished an MCMC step. In this step, we know who are
-// // # non-consumers (N_i < 0), and who are consumers (N_i > 0).
-// // # Use Gauss-Hermite quadrature method to approximate the Q_F,
-// // # which is average amount of food on consumption day for consumers
-// // # (equations A.5 in section A.16). This is done using the
-// // # backtransform_20130925 function.
-// // # Then plug it in to compute the usual intake for consumers (equation A.2
-// // # in section A.15).
-// // # Do this for about 200 MCMC steps near the end, with thinning of 50.
-// // ###########################################################################
-//               // double vt = (nMCMC - (ndist - 1) * nthin);
-//               // arma::vec ut = arma::regspace(vt, nthin, nMCMC);
-//               // 
-//               // if(any( ut == jjMCMC)){
-//               //   
-//               //   arma::vec    uuindex(Ni.n_elem);  // Indicator of a never-consumer
-//               //   for(int i = 0; i < Ni.n_elem; Ni ++){
-//               //     if(Ni(i)< 0){
-//               //       uuindex(i) = 1.0;
-//               //     }else{
-//               //       uuindex(i) = 0.0;
-//               //     }
-//               //   }
-//               //   
-//               //   arma::mat f = arma::sqrtmat_sympd(Sigmau);
-//               //   arma::mat Utildei1 = arma::randn(n,Sigmau.n_cols)*f; 
-//               //   arma::uvec row =  arma::find(uuindex == 1) ;   
-//               //   double nindex = row.n_rows;
-//               //   arma::mat temp_1[row.n_rows];
-//               //   
-//               //   arma::mat temp_mat = Xtildei.slice(2);
-//               //   arma::vec temp_vec = Utildei.col(2);
-//               //   temp_vec = temp_vec.elem(row);
-//               //   temp_1 = backtransform_c(lambda_rec_food, temp_mat.rows(row) , beta.col(2), std::sqrt(Sigmae(2,2)),
-//               //                          mumu, 
-//               //                          sigsig, 
-//               //                          temp_vec,
-//               //                          row.n_rows);
-//               //   // temp[temp < a0_food] = a0_food
-//                 // temp = temp * pnorm(Xtildei[uuindex, ,1] %*% beta[ ,1]
-//                 //                        + Utildei[uuindex,1])# get usual intake (n*1), eq A.2
-//                 // usual_intake_food = temp
-//                 // temp = backtransform_c(as.numeric(lambda_rec_energy), Xtildei[uuindex == 1, ,3],
-//                 //                         beta[ ,3], sqrt(Sigmae[3,3]), mu_e, sig_e, Utildei[uuindex == 1,3],
-//                 //                                                                           nindex)
-//                 // temp[temp < a0_energy] = a0_energy
-//                 // usual_intake_energy = temp
-// // # store the results for this run
-// //                 col_index = as.numeric((jjMCMC - (nMCMC - (ndist - 1)%*% nthin))/ nthin + 1)
-// //                 usual_intake_food_trace[ ,col_index]= c(usual_intake_food, rep(NaN,(n - nindex)))
-// //                 usual_intake_energy_trace[ ,col_index]=c(usual_intake_energy, rep(NaN,(n - nindex)))
-// //                 
-// //                 
-// //               }
-// //   }
-// //   
-// // ###########################################################################
-// // # end of MCMC
-// // ###########################################################################
-//   std::cout<<'MCMC completed'<<std::endl;
-//     std::cout<<' '<<std::endl;
-//     std::cout<<' '<<std::endl;
-//     std::cout<<' '<<std::endl;
-//     std::cout<<' '<<std::endl;
-//     std::cout<<' '<<std::endl;
-//     std::cout<<' '<<std::endl;
-// 
-//    return Rcpp::List::create( Rcpp::Named("alpha_trace") = alpha_trace, Rcpp::Named("beta_trace") = beta_trace, Rcpp::Named("never_trace") = never_trace,
-//                         Rcpp::Named("r_trace") = r_trace, Rcpp::Named("theta_trace") = theta_trace, Rcpp::Named("s22_trace") = s22_trace,
-//                         Rcpp::Named("s33_trace") = s33_trace,Rcpp::Named("Sigmae_trace") = Sigmae_trace, Rcpp::Named("Sigmau_trace") =Sigmau_trace);  /*, usual_intake_food_trace = usual_intake_food_trace, usual_intake_energy_trace = usual_intake_energy_trace))*/
-// //return 0;
-// 
-// }
-// }
+    arma::mat   xx     = Xtildei.slice(1);
+    double mmnn        =  xx.n_cols;
+    arma::mat  cc1     = (inv(prior_alpha_cov)*prior_alpha_mean) + GGalpha.t()*Ni;
+    arma::mat  cc2     = inv(GGalpha.t()*GGalpha + inv(prior_alpha_cov));
+    arma::mat  mujj    = cc2 * cc1;
+   // cc2 = (cc2 + cc2.t())/2;
+    arma::mat sijj     = arma::sqrtmat_sympd(cc2);
+    arma::mat  alpha_1   = mujj + sijj*arma::randn(GGalpha.n_cols);
+    alpha = alpha_1.col(0);
+//    std::cout << "alpha = "<< alpha << std::endl;
+// ###########################################################################
+// # Update W1 and W2
+// ###########################################################################
+    double  numgen     = 5;
+    arma::cube Wtildeinew = gen_Wtildei_1foodplusenergy_never_c(Wtildei,beta,Xtildei,Utildei,n,
+                                                      iSigmae,Wistar,mmi,numgen);
+    Wtildei    = Wtildeinew;
+//    std::cout << "Wtildei = "<< Wtildei << std::endl;
+// ###########################################################################
+// # Calculate W-XB-U
+// ###########################################################################
+    arma::mat  tt(n,ndim);
+    tt.zeros();
+        for(int jj = 0; jj < ndim; jj++){
+          tt.col(jj) = (Xtildei.slice(jj) * beta.col(jj)) + Utildei.col(jj);
+        }
+
+     arma::cube  y(n, ndim, mmi);
+        for(int i = 0; i < mmi;i++){
+            y.slice(i) = tt;
+          }
+     arma::cube     qq = Wtildei - y;
+//    std::cout << "qq = "<< qq << std::endl;
+// ###########################################################################
+// # Update iSigmae
+// ###########################################################################
+             double rnew    = updated_parameter_r_never_c(r,theta,s22,s33,qq,mmi,n);
+             r        = rnew;
+             double thetanew = updated_parameter_theta_never_c(r,theta,s22,s33,qq,mmi);
+             theta    = thetanew;
+             double s22new   = updated_parameter_s22_never_c(r,theta,s22,s33,qq,mmi,n);
+             s22      = s22new;
+             double s33new   = updated_parameter_s33_never_c(r,theta,s22,s33,qq,mmi,n);
+             s33      = s33new;
+
+             arma::mat R = {{1, 0, r*cos(theta)},
+             {0,  1, r*sin(theta)},
+             {r*cos(theta), r*sin(theta), 1}};
+             arma::vec v = {1, sqrt(s22), sqrt(s33)};
+             arma::mat A = arma::diagmat(v);
+
+             Sigmae  = A * R * A;
+             iSigmae = inv(Sigmae);
+//             std::cout << "Sigmae = "<< Sigmae << std::endl;
+// ###########################################################################
+// # Update iSigmaU
+// ###########################################################################
+            Rcpp::List update_sig = update_iSigmau_c(Sigmau, prior_Sigmau_doff,
+                                           prior_Sigmau_mean,Utildei,n, jjMCMC);
+
+            arma::mat Sigmau_new  = update_sig["Sigmau_new"];
+            arma::mat iSigmau_new = update_sig["iSigmau_new"];
+            Sigmau      = Sigmau_new;
+            iSigmau     = iSigmau_new;
+            
+//            std::cout << "Sigmau = "<< Sigmau << std::endl; 
+// ###########################################################################
+// # Update Utildei. This is done in two steps. In the first step, we generate
+// # it assuming that everyone is a consumer. In the second step, those who
+// # are never consumers, i.e., Ni < 0, have their values updated by a
+// # Metropolis step.
+// ###########################################################################
+            arma::mat Utildei_new= update_Utildei_c(Utildei,beta,Wtildei,iSigmae,
+                                           Ni,isnever,didconsume,Xtildei,mmi,iSigmau,n);
+            Utildei     = Utildei_new;
+            
+//            std::cout << "Utildei = "<< Utildei << std::endl; 
+//###########################################################################
+// # Update beta1 using a Metropolis Step.
+// ###########################################################################
+            double pp = beta.n_rows;
+            arma::vec beta1(pp), beta2(pp), beta3(pp);
+            if (rw_ind == 1){
+              beta1 = update_beta1_with_prior_mean_random_walk_c(Xtildei,mmi,
+                                                                  prior_beta_mean, prior_beta_cov,beta,Wtildei, Utildei,
+                                                                  iSigmae,isnever,update_beta1_var_ind);
+            } else {
+              beta1  = update_beta1_with_prior_mean_c(Xtildei,mmi,prior_beta_mean,
+                                                      prior_beta_cov,beta,Wtildei, Utildei,iSigmae,isnever,
+                                                      update_beta1_var_ind);
+            }
+// count if beta1 moves
+            // arma::uvec accept_count = arma::find(beta1 == beta.col(1));
+            // beta1_accept_count = beta1_accept_count + (1 - accept_count);
+            beta.col(0)  = beta1;
+//            std::cout << "beta1 = "<< beta1 << std::endl;
+// ###########################################################################
+// # Update beta2. This does not need a Metropolis step
+// ###########################################################################
+              beta2 = update_beta2_with_prior_mean_c(Xtildei,mmi, prior_beta_mean,
+                                                      prior_beta_cov,beta,Wtildei, Utildei,iSigmae);
+              beta.col(1)  = beta2;
+// ###########################################################################
+// # Update beta2. This does not need a Metropolis step
+// ###########################################################################
+              beta3 = update_beta3_with_prior_mean_c(Xtildei,mmi, prior_beta_mean,
+                                                      prior_beta_cov,beta,Wtildei, Utildei,iSigmae);
+              beta.col(2)  = beta3;
+//              std::cout << "beta = "<< beta << std::endl;
+//###########################################################################
+// # Store results
+// ###########################################################################
+ 
+              Sigmae_trace.slice(jjMCMC) = Sigmae;
+              Sigmau_trace.slice(jjMCMC) = Sigmau;
+              beta_trace.slice(jjMCMC)   = beta;
+              r_trace(jjMCMC,0)          = r;
+              theta_trace(jjMCMC,0)      = theta;
+              s22_trace(jjMCMC,0)        = s22;
+              s33_trace(jjMCMC,0)        = s33;
+              alpha_trace.row(jjMCMC)    = alpha.t();
+              never_trace(jjMCMC,0)      = 1 - arma::accu(arma::normcdf(GGalpha * alpha))/n ;
+
+// ###########################################################################
+// # Compute distribution of usual intake.
+// # Suppose we have finished an MCMC step. In this step, we know who are
+// # non-consumers (N_i < 0), and who are consumers (N_i > 0).
+// # Use Gauss-Hermite quadrature method to approximate the Q_F,
+// # which is average amount of food on consumption day for consumers
+// # (equations A.5 in section A.16). This is done using the
+// # backtransform_20130925 function.
+// # Then plug it in to compute the usual intake for consumers (equation A.2
+// # in section A.15).
+// # Do this for about 200 MCMC steps near the end, with thinning of 50.
+// ###########################################################################
+double vt = (nMCMC - (ndist - 1) * nthin);
+arma::vec ut = arma::regspace(vt, nthin, nMCMC);
+// std::cout << "ut = " << ut <<std::endl;
+// std::cout << "vt = " << vt <<std::endl;
+
+int flag = 0;
+for(int i = 0; i < ut.n_elem; i++){
+  if(ut(i) == jjMCMC)
+    flag = flag + 1;
+  }
+//std::cout <<"check check" << std::endl;
+if(flag > 0){
+ //std::cout << "Ni = " << Ni <<std::endl;
+  arma::vec    uuindex(Ni.n_elem);  // Indicator of a never-consumer
+  for(int i = 0; i < Ni.n_elem; i ++){
+    if(Ni(i)> 0){
+      uuindex(i) = 1.0;
+    }else{
+      uuindex(i) = 0.0;
+    }
+  }
+  double nindex = sum(uuindex);
+  
+ // std::cout << "nindex = " << nindex <<std::endl;
+  arma::mat f = arma::sqrtmat_sympd(Sigmau);
+  arma::mat Utildei1 = arma::randn(n,Sigmau.n_cols)*f;
+  arma::uvec row_vec =  arma::find(uuindex == 1.0) ;
+ // std::cout << "row = " << row_vec<< std::endl;
+  //arma::mat temp_1(row_vec.n_rows,1);
+
+  arma::mat temp_mat = Xtildei.slice(1);
+  arma::vec temp_vec = Utildei.col(1);
+  temp_vec = temp_vec.elem(row_vec);
+  arma::mat temp_1 = backtransform_c(lambda_rec_food, temp_mat.rows(row_vec) , beta.col(1), std::sqrt(Sigmae(1,1)),
+                                     mumu, sigsig, temp_vec, nindex);  //arma::zeros(row_vec.n_rows);
+  
+ // std::cout <<  "X = " << temp_mat.rows(row_vec) <<std::endl;
+  //std::cout <<  "U = " << temp_vec <<std::endl;
+  // std::cout << backtransform_c(lambda_rec_food, temp_mat.rows(row_vec) , beta.col(1), std::sqrt(Sigmae(1,1)),
+  //                           mumu, sigsig, temp_vec, nindex) << std::endl;
+  // 
+  for(int i=0; i < temp_1.n_rows; i++){
+    for(int j =0; j< temp_1.n_cols; j++){
+      if(temp_1(i,j) < a0_food){
+        temp_1(i,j) = a0_food;
+      }
+    }
+  }
+  arma::mat temp_mat_1 = Xtildei.slice(0);
+      arma::vec temp_vec_1 = Utildei.col(0);    
+  
+  temp_1 = temp_1 % arma::normcdf(temp_mat_1.rows(row_vec)* beta.col(0) + temp_vec_1.rows(row_vec));
+                                      //get usual intake (n*1), eq A.2
+  arma::vec usual_intake_food = temp_1.col(0);
+ // std::cout<<  "usual_intake_food = " << usual_intake_food <<std::endl;
+  
+  arma::mat temp_mat_e = Xtildei.slice(2);
+  arma::vec temp_vec_e = Utildei.col(2);
+  temp_vec = temp_vec_e.elem(row_vec);
+  arma::mat temp_2 = arma::zeros(row_vec.n_rows);
+  
+ temp_2 = backtransform_c(lambda_rec_food, temp_mat.rows(row_vec) , beta.col(2), std::sqrt(Sigmae(2,2)),
+                          mumu, sigsig, temp_vec, nindex);
+ 
+ for(int i=0; i < temp_2.n_rows; i++){
+   for(int j =0; j< temp_2.n_cols; j++){
+     if(temp_2(i,j) < a0_energy){
+       temp_2(i,j) = a0_energy;
+     }
+   }
+ }
+ arma::vec usual_intake_energy = temp_2.col(0);
+// # store the results for this run
+    double col_index = ((jjMCMC - (nMCMC - (ndist - 1) * nthin))/ nthin + 1);
+    arma::vec fill_col(n - nindex);
+    fill_col.fill(arma::datum::nan);
+    arma::vec food_vec = arma::join_cols(usual_intake_food, fill_col);
+    arma::vec energy_vec = arma::join_cols(usual_intake_energy, fill_col);
+    
+    usual_intake_food_trace.col(col_index)= food_vec;
+    usual_intake_energy_trace.col(col_index)= energy_vec;
+
+
+               }
+}
+
+// ###########################################################################
+// # end of MCMC
+// ###########################################################################
+  std::cout<<'MCMC completed'<<std::endl;
+    std::cout<<' '<<std::endl;
+    std::cout<<' '<<std::endl;
+    std::cout<<' '<<std::endl;
+    std::cout<<' '<<std::endl;
+    std::cout<<' '<<std::endl;
+    std::cout<<' '<<std::endl;
+
+ return Rcpp::List::create( Rcpp::Named("alpha_trace") = alpha_trace, Rcpp::Named("never_trace") = never_trace, Rcpp::Named("beta_trace") = beta_trace,
+                      Rcpp::Named("r_trace") = r_trace, Rcpp::Named("theta_trace") = theta_trace, Rcpp::Named("s22_trace") = s22_trace,
+                      Rcpp::Named("s33_trace") = s33_trace,Rcpp::Named("Sigmae_trace") = Sigmae_trace, Rcpp::Named("Sigmau_trace") =Sigmau_trace,
+                      Rcpp::Named("usual_intake_food_trace") = usual_intake_food_trace, Rcpp::Named("usual_intake_energy_trace") = usual_intake_energy_trace);
+
+
+}
