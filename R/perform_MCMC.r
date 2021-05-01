@@ -201,7 +201,7 @@ perform_MCMC = function(nMCMC,nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGal
     usual_intake_energy <- as.vector(temp)
     #print("Done upto usual_intake_energy")
     # store the results for this run
-    col_index = as.numeric((jjMCMC - (nMCMC - (ndist - 1) %*% nthin)) / nthin + 1)
+    col_index = as.numeric((jjMCMC - (nMCMC - (ndist - 1) * nthin)) / nthin + 1)
     usual_intake_food_trace[ ,col_index] <- c(usual_intake_food, rep(NaN,(n - nindex)))
     usual_intake_energy_trace[ ,col_index] <- c(usual_intake_energy, rep(NaN,(n - nindex)))
     }

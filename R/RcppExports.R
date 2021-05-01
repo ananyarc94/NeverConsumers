@@ -73,6 +73,10 @@ backtransform_c <- function(lambda, Xtildei, beta, sigmae, mumu, sigsig, Utildei
     .Call(`_NeverConsumersR_backtransform_c`, lambda, Xtildei, beta, sigmae, mumu, sigsig, Utildei, n)
 }
 
+perform_MCMC_c <- function(nMCMC, nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGalpha, didconsume, prior_alpha_cov, prior_alpha_mean, Wtildei, iSigmae, iSigmau, Wistar, r, theta, s22, s33, Sigmau, Sigmae, prior_Sigmau_mean, prior_Sigmau_doff, prior_Sigmae_doff, prior_beta_mean, prior_beta_cov, update_beta1_var_ind, lambda_rec_food, lambda_rec_energy, mumu, sigsig, mu_e, sig_e, mdesign, rw_ind, beta1_accept_count, a0_food, a0_energy, ndist, ndim) {
+    .Call(`_NeverConsumersR_perform_MCMC_c`, nMCMC, nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGalpha, didconsume, prior_alpha_cov, prior_alpha_mean, Wtildei, iSigmae, iSigmau, Wistar, r, theta, s22, s33, Sigmau, Sigmae, prior_Sigmau_mean, prior_Sigmau_doff, prior_Sigmae_doff, prior_beta_mean, prior_beta_cov, update_beta1_var_ind, lambda_rec_food, lambda_rec_energy, mumu, sigsig, mu_e, sig_e, mdesign, rw_ind, beta1_accept_count, a0_food, a0_energy, ndist, ndim)
+}
+
 rcpparma_hello_world <- function() {
     .Call(`_NeverConsumersR_rcpparma_hello_world`)
 }

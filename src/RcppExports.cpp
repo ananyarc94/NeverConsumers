@@ -18,13 +18,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // mod
-/*  * Extend division reminder to vectors  *  * @param   a       Dividend   * @param   n       Divisor  */ double mod(double a, int n);
+/*  * Extend division reminder to vectors  *  * @param   a       Dividend   * @param   n       Divisor  */ double mod(double a, double n);
 RcppExport SEXP _NeverConsumersR_mod(SEXP aSEXP, SEXP nSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< double >::type a(aSEXP);
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
     rcpp_result_gen = Rcpp::wrap(mod(a, n));
     return rcpp_result_gen;
 END_RCPP
@@ -288,20 +288,71 @@ BEGIN_RCPP
 END_RCPP
 }
 // backtransform_c
-arma::mat backtransform_c(const double lambda, arma::mat& Xtildei, arma::vec& beta, double sigmae, double mumu, double sigsig, arma::vec& Utildei, double& n);
+arma::mat backtransform_c(const double lambda, arma::mat Xtildei, arma::vec beta, double sigmae, double mumu, double sigsig, arma::vec Utildei, double& n);
 RcppExport SEXP _NeverConsumersR_backtransform_c(SEXP lambdaSEXP, SEXP XtildeiSEXP, SEXP betaSEXP, SEXP sigmaeSEXP, SEXP mumuSEXP, SEXP sigsigSEXP, SEXP UtildeiSEXP, SEXP nSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type Xtildei(XtildeiSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Xtildei(XtildeiSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< double >::type sigmae(sigmaeSEXP);
     Rcpp::traits::input_parameter< double >::type mumu(mumuSEXP);
     Rcpp::traits::input_parameter< double >::type sigsig(sigsigSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type Utildei(UtildeiSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type Utildei(UtildeiSEXP);
     Rcpp::traits::input_parameter< double& >::type n(nSEXP);
     rcpp_result_gen = Rcpp::wrap(backtransform_c(lambda, Xtildei, beta, sigmae, mumu, sigsig, Utildei, n));
+    return rcpp_result_gen;
+END_RCPP
+}
+// perform_MCMC_c
+Rcpp::List perform_MCMC_c(const double nMCMC, const double nthin, const double n, const double mmi, const arma::cube& Xtildei, arma::mat& Utildei, arma::mat& beta, arma::vec& alpha, arma::mat& GGalpha, arma::vec didconsume, arma::mat& prior_alpha_cov, arma::vec& prior_alpha_mean, arma::cube Wtildei, arma::mat& iSigmae, arma::mat& iSigmau, arma::mat& Wistar, double r, double theta, double s22, double s33, arma::mat& Sigmau, arma::mat& Sigmae, arma::mat& prior_Sigmau_mean, double prior_Sigmau_doff, double prior_Sigmae_doff, arma::mat& prior_beta_mean, arma::cube& prior_beta_cov, double update_beta1_var_ind, double lambda_rec_food, double lambda_rec_energy, double mumu, double sigsig, double mu_e, double sig_e, double mdesign, double rw_ind, arma::vec& beta1_accept_count, double a0_food, double a0_energy, double ndist, double ndim);
+RcppExport SEXP _NeverConsumersR_perform_MCMC_c(SEXP nMCMCSEXP, SEXP nthinSEXP, SEXP nSEXP, SEXP mmiSEXP, SEXP XtildeiSEXP, SEXP UtildeiSEXP, SEXP betaSEXP, SEXP alphaSEXP, SEXP GGalphaSEXP, SEXP didconsumeSEXP, SEXP prior_alpha_covSEXP, SEXP prior_alpha_meanSEXP, SEXP WtildeiSEXP, SEXP iSigmaeSEXP, SEXP iSigmauSEXP, SEXP WistarSEXP, SEXP rSEXP, SEXP thetaSEXP, SEXP s22SEXP, SEXP s33SEXP, SEXP SigmauSEXP, SEXP SigmaeSEXP, SEXP prior_Sigmau_meanSEXP, SEXP prior_Sigmau_doffSEXP, SEXP prior_Sigmae_doffSEXP, SEXP prior_beta_meanSEXP, SEXP prior_beta_covSEXP, SEXP update_beta1_var_indSEXP, SEXP lambda_rec_foodSEXP, SEXP lambda_rec_energySEXP, SEXP mumuSEXP, SEXP sigsigSEXP, SEXP mu_eSEXP, SEXP sig_eSEXP, SEXP mdesignSEXP, SEXP rw_indSEXP, SEXP beta1_accept_countSEXP, SEXP a0_foodSEXP, SEXP a0_energySEXP, SEXP ndistSEXP, SEXP ndimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double >::type nMCMC(nMCMCSEXP);
+    Rcpp::traits::input_parameter< const double >::type nthin(nthinSEXP);
+    Rcpp::traits::input_parameter< const double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const double >::type mmi(mmiSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type Xtildei(XtildeiSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Utildei(UtildeiSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type GGalpha(GGalphaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type didconsume(didconsumeSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type prior_alpha_cov(prior_alpha_covSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type prior_alpha_mean(prior_alpha_meanSEXP);
+    Rcpp::traits::input_parameter< arma::cube >::type Wtildei(WtildeiSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type iSigmae(iSigmaeSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type iSigmau(iSigmauSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Wistar(WistarSEXP);
+    Rcpp::traits::input_parameter< double >::type r(rSEXP);
+    Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< double >::type s22(s22SEXP);
+    Rcpp::traits::input_parameter< double >::type s33(s33SEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Sigmau(SigmauSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Sigmae(SigmaeSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type prior_Sigmau_mean(prior_Sigmau_meanSEXP);
+    Rcpp::traits::input_parameter< double >::type prior_Sigmau_doff(prior_Sigmau_doffSEXP);
+    Rcpp::traits::input_parameter< double >::type prior_Sigmae_doff(prior_Sigmae_doffSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type prior_beta_mean(prior_beta_meanSEXP);
+    Rcpp::traits::input_parameter< arma::cube& >::type prior_beta_cov(prior_beta_covSEXP);
+    Rcpp::traits::input_parameter< double >::type update_beta1_var_ind(update_beta1_var_indSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda_rec_food(lambda_rec_foodSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda_rec_energy(lambda_rec_energySEXP);
+    Rcpp::traits::input_parameter< double >::type mumu(mumuSEXP);
+    Rcpp::traits::input_parameter< double >::type sigsig(sigsigSEXP);
+    Rcpp::traits::input_parameter< double >::type mu_e(mu_eSEXP);
+    Rcpp::traits::input_parameter< double >::type sig_e(sig_eSEXP);
+    Rcpp::traits::input_parameter< double >::type mdesign(mdesignSEXP);
+    Rcpp::traits::input_parameter< double >::type rw_ind(rw_indSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type beta1_accept_count(beta1_accept_countSEXP);
+    Rcpp::traits::input_parameter< double >::type a0_food(a0_foodSEXP);
+    Rcpp::traits::input_parameter< double >::type a0_energy(a0_energySEXP);
+    Rcpp::traits::input_parameter< double >::type ndist(ndistSEXP);
+    Rcpp::traits::input_parameter< double >::type ndim(ndimSEXP);
+    rcpp_result_gen = Rcpp::wrap(perform_MCMC_c(nMCMC, nthin, n, mmi, Xtildei, Utildei, beta, alpha, GGalpha, didconsume, prior_alpha_cov, prior_alpha_mean, Wtildei, iSigmae, iSigmau, Wistar, r, theta, s22, s33, Sigmau, Sigmae, prior_Sigmau_mean, prior_Sigmau_doff, prior_Sigmae_doff, prior_beta_mean, prior_beta_cov, update_beta1_var_ind, lambda_rec_food, lambda_rec_energy, mumu, sigsig, mu_e, sig_e, mdesign, rw_ind, beta1_accept_count, a0_food, a0_energy, ndist, ndim));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -368,6 +419,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NeverConsumersR_update_beta3_with_prior_mean_c", (DL_FUNC) &_NeverConsumersR_update_beta3_with_prior_mean_c, 8},
     {"_NeverConsumersR_ginverse_c", (DL_FUNC) &_NeverConsumersR_ginverse_c, 2},
     {"_NeverConsumersR_backtransform_c", (DL_FUNC) &_NeverConsumersR_backtransform_c, 8},
+    {"_NeverConsumersR_perform_MCMC_c", (DL_FUNC) &_NeverConsumersR_perform_MCMC_c, 41},
     {"_NeverConsumersR_rcpparma_hello_world", (DL_FUNC) &_NeverConsumersR_rcpparma_hello_world, 0},
     {"_NeverConsumersR_rcpparma_outerproduct", (DL_FUNC) &_NeverConsumersR_rcpparma_outerproduct, 1},
     {"_NeverConsumersR_rcpparma_innerproduct", (DL_FUNC) &_NeverConsumersR_rcpparma_innerproduct, 1},
