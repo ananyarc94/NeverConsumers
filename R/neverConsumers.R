@@ -585,9 +585,9 @@ neverConsumers = function(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_foo
   adj_factor = 1  # This is in here because the Norfolk energy data are on a
   # different scale from the EATS energy data.
   ui_percentile_ind = c(5, 10, 25, 50, 75, 90, 95)
-  temp1 = t(food_distribution[ui_percentile_ind]);
-  temp2 = t(energy_distribution[ui_percentile_ind])/adj_factor;
-  temp3 = t(ratio_distribution[ui_percentile_ind])*adj_factor;
+  food_distribution_percentile = t(food_distribution[ui_percentile_ind]);
+  energy_distribution_percentile = t(energy_distribution[ui_percentile_ind])/adj_factor;
+  ratio_distribution_percentile = t(ratio_distribution[ui_percentile_ind])*adj_factor;
 
   # ###########################################################################
   # # What percentage of MCMC steps in which beta1 moves
@@ -708,7 +708,7 @@ neverConsumers = function(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_foo
               Sigmae_postmean = Sigmae_postmean, Sigmae_postsd = Sigmae_postsd, Sigmae_ci = Sigmae_ci, 
               mu_ui_food = mu_ui_food, sig_ui_food = sig_ui_food, mu_ui_energy = mu_ui_energy,
               sig_ui_energy = sig_ui_energy, mu_ui_ratio = mu_ui_ratio, sig_ui_ratio = sig_ui_ratio,
-              food_distribution = food_distribution, energy_distribution = energy_distribution,
-              ratio_distribution = ratio_distribution))
+              food_distribution_percentile = food_distribution_percentile, energy_distribution_percentile = energy_distribution_percentile,
+              ratio_distribution_percentile = ratio_distribution_percentile))
 }
 
