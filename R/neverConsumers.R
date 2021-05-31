@@ -1,13 +1,13 @@
 #' Identify Never-Consumers in Zero Inflated Poisson Models
 #'
-#'@description A function to estimate percentage of never-consumers in the context of nutrition. The method implemented in this function has been developed in the paper
+#'A function to estimate percentage of never-consumers in the context of nutrition. The method implemented in this function has been developed in the paper
 #'"Measurement error models with zero - inflation and multiple sources of zero with an application to the never consumers problem in nutrition". If we have data on whether 
 #'or not a person has consumed a certain food on the day of the study, amount of food consumed and energy obtained with a bunch of covariates and multiple recalls then we 
 #'can use this function to model the data and obtain an estimate of the percentage of never-consumers of the food of interest. The data for this function must include 
 #'number of recalls and the response in three different variable (i.e. an indicator of food consumed, amount of food consumed and amount of energy generated from the food). 
 #'It also needs some covariates. A list of other parameters that must be specified by the user are given below. 
 #' 
-#' @usage  neverConsumers(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_food_col,
+#'@usage  neverConsumers(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_food_col,
 #' FFQ_energy_col, with_covariates_ind, n_gen, lambda_rec_food, lambda_rec_energy, 
 #' lambda_FFQ_food, lambda_FFQ_energy,beta_temp, Sigmau_temp_episodically)
 #' 
@@ -53,27 +53,27 @@
 #' @param beta1_accept_count  count how many times beta1 moves. Default value is 0.
 #' @param myseed  initialize random seed
 #'
-#' @return 
-#' alpha_postmean,alpha_postsd, alpha_ci      : Mean, Sd and CI's of the mean parameter of the prior distribution of percentage 
+#' @return \tabular{ll}{
+#' \code{alpha_postmean,alpha_postsd, alpha_ci} \tab Mean, Sd and CI's of the mean parameter of the prior distribution of percentage 
 #'                                              of never consumers \cr
-#' \cr                                              
-#' never_postmean, never_postsd, never_ci     : Mean, Sd and CI's of the percentage of never consumers \cr 
-#' \cr                      
-#' beta_postmean, beta_postsd, beta_ci        : Mean, Sd and CI's of slope parameters for the covariates \cr
-#' \cr                        
-#' Sigmau_postmean, Sigmau_postsd, Sigmau_ci  : Mean, Sd and CI's of the variance covariance matrix of the random effects \cr   
-#' \cr      
-#' Sigmae_postmean, Sigmae_postsd, Sigmae_ci  : Mean, Sd and CI's of the variance covariance matrix of the white noise  \cr      
-#' \cr      
-#' mu_ui_food, sig_ui_food                    : Mean and Sd of the distribution of usual intake of food   \cr  
-#' \cr                     
-#' mu_ui_energy, sig_ui_energy                : Mean and Sd of the distribution of usual intake of the ratio = food/(energy/1000) \cr
-#' \cr
-#' mu_ui_ratio, sig_ui_ratio                  : Mean and Sd of the distribution of usual intake of energy \cr   
-#' \cr                        
-#' food_distribution, energy_distribution     : Distribution of usual intake of food, energy and food/(energy/1000)                        
-#' and ratio_distribution
-#' @export
+#' \tab \cr                                             
+#' \code{never_postmean, never_postsd, never_ci} \tab Mean, Sd and CI's of the percentage of never consumers \cr 
+#' \tab \cr                      
+#' \code{beta_postmean, beta_postsd, beta_ci} \tab Mean, Sd and CI's of slope parameters for the covariates \cr
+#' \tab \cr                        
+#' \code{Sigmau_postmean, Sigmau_postsd, Sigmau_ci} \tab Mean, Sd and CI's of the variance covariance matrix of the random effects \cr   
+#' \tab \cr     
+#' \code{Sigmae_postmean, Sigmae_postsd, Sigmae_ci} \tab Mean, Sd and CI's of the variance covariance matrix of the white noise  \cr      
+#' \tab \cr      
+#' \code{mu_ui_food, sig_ui_food} \tab Mean and Sd of the distribution of usual intake of food   \cr  
+#' \tab \cr                     
+#' \code{mu_ui_energy, sig_ui_energy}   \tab Mean and Sd of the distribution of usual intake of the ratio = food/(energy/1000) \cr
+#' \tab \cr
+#' \code{mu_ui_ratio, sig_ui_ratio} \tab Mean and Sd of the distribution of usual intake of energy \cr   
+#' \tab \cr                       
+#' \code{food_distribution, energy_distribution and ratio_distribution}  \tab Percentiles of the distribution of usual intake of food, energy and food/(energy/1000) \cr                       
+#' }
+#'@export
 #'           
 #' @examples 
 #' 
