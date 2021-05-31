@@ -1,0 +1,209 @@
+---
+title: "Never Consumers vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Never_Consumers_vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this package we implement the method developed in the paper "Measurement Error Models with Zero Inflation and Multiple Sources of Zero with Applications to a Never Consumers problem in Nutrition".
+
+#### Introduction
+
+There is a long history of estimating the distribution of a true variable subject to measurement error, also known as the deconvolution problem. There are many variables that are semi-continuous or zero-inflated, in the sense that the data are either zero or positive. In nutrition, these variables include the intake of alcoholic beverages, fish, whole grains, etc. These variables are measured with considerable within-person error. When only one variable is measured, and it is zero-inflated, the literature includes Tooze et al. (2002, 2006) and Kipnis et al. (2009).
+
+In many problems, however, not limited to nutrition, there are additional variables measured with error that are not subject to occasional or excess zeros.There are practical cases, however, when some individuals will always report zero. This occurs, for example, with alcohol consumed from alcoholic beverages, reported on a daily basis, or with red meat, fish and deep orange vegetable consumption. In the former case, the majority of American adults are frequent or occasional consumers of alcoholic beverages,but a fraction never consume alcoholic beverages. Thus, in measurements made on a single occasion, e.g., one day, there are two sources of zeros: the occasional zeros caused by episodic consumption, and the hard zeros caused by being a never-consumer of alcoholic beverages. In most studies, it is not feasible to obtain more than a small number of repeated measurements, e.g. 2-4, on any individual. If all such measurements are zero it is not possible to distinguish,at the individual level, whether the person is an episodic consumer or a never consumer. This
+is what makes the problem so difficult.In many instances, nutritionists are interested in the amount of a dietary component consumed relative to the amount of calories consumed, thus controlling for energy consumption.
+
+Typically, they use the amount of the dietary component consumed per 1000 kilo-calories, so it is important to be able to model both simultaneously. Such controlling for energy intake is a major feature of eating indices, such as the Health Eating Index (Guenther et al., 2013) and the Alternative Eating Index (Varraso et al., 2015). It is also standard in nutritional epidemiology of diseases and diet, where it is used as the primary covariate of interest in disease prediction, while energy intake itself is an additional covariate.
+
+We propose a new model to accomplish five things: (a) adjust for measurement error; (b) allow for episodic consumers; (c) allow for never-consumers; (d) includes an additional continuous variable such as energy (caloric) intake; and (e) overcomes the numerical difficulties discussed above.
+
+#### Covariates 
+
+It is useful to distinguish between covariates G for modeling the probability of being a neverconsumer and covariates X, for modeling everything else. In Bayesian modeling of binary responses, it is computationally convenient to use a probit rather than a logistic model (Albert and Chib, 1993), a convention we follow here. Also, by convention and for numerical stability, the continuous components of (G, X) are pre-standardized to have mean zero and variance one.
+
+#### Responses
+
+The three dietary variables $Y_{i1k}$, the indicator of whether the food is reported
+to have been consumed on day k, $Y_{i2k}$, the reported amount of the food consumed on day k, and $Y_{i3k}$, the reported amount of energy consumed on day k are our responses. $Y_{i1k}$ is a latent variable.
+
+For modeling whether a person is a consumer or not, we consider a latent variable, $ Ni = Normal(G^T_{i}α, 1) $, so that a person is a consumer if $Ni > 0 $and is a never-consumer if $Ni < 0$. Hence, the marginal probability of being a consumer is $Φ(G^T_i α)$, where $Φ(·) $is the standard normal distribution function.
+
+#### Model 
+
+We then define $(W_{i1k}, W_{i2k}, W_{i3k})$ as
+                            $Y_{i1k} = 1 ⇐⇒  W_{i1k} > 0;$
+          $W_{ijk} = (√2)\{S_{ijk}(λ_j ) − µ_j (λ_j )\}/ς_j (λ_j ), j = 2, 3$
+
+where $S_{ijk}(λ_j ) = g(Y_{ijk}, λ_j )$, g being the box-cox transformation and $λ_j$ being the transformation parameter.
+
+Then our model boils down to:
+                        $W_{ijk} = X^T_i β_j + U_{ij} + \epsilon_{ijk}$,
+
+with $(U_{i1}, U_{i2}, U_{i3})^T = Normal(0, Σ_u), and (\epsilon_{i1k}, \epsilon_{i2k}, \epsilon_{i3k})^T = Normal(0, Σ_\epsilon)$.
+
+The covariance matrix $Σ_u$ is unstructured. For $Σ_\epsilon$ a polar coordinate representation involving parameters $(γ, θ)$ for correlations among $(\epsilon_{i1k}, \epsilon_{i2k}, \epsilon_{i3k})$, and valiance parameters $(σ_{22}, σ_{33})$, following Zhang, et al. (2011a) is used where $ γ ∈ (−1, 1)$ and $θ ∈ (−π, π)$.
+
+The parameters of interest here are $\alpha$, $\beta$, $\Sigma_u$, $\gamma$,$\theta$, $s22$, $s33$,
+and the probability of being a never consumer.Using these estimates, we also estimate the distributions of usual intake of food, energy amd the ratio (food/(energy/1000)). 
+
+#### Inference
+
+We follow a Bayesian approch to solve this problem. We have priors over all of the parameters and we obtain the posterior estimates by MCMC calculations which are a combination of Gibbs and Metropolis-Hastings steps.
+
+#### Implementation of the package
+
+As an example, we have simulated a dataset to mimic the structure of the Eating at America’s Table Study (EATS) with 20 male subjects and 4 recalls per subject. The example dataset is attached with this package. The dataset has three responses - an indicator of whether food has been consumed on that particular day, amount of food consumed and amount of energy obtained. We also have 4 recalls for all subjects and some covariates. If there is any missing data, we drop those rows. For our simulated data we have four covariates age, BMI, DHQ_alcohol and DHQ_energy. First lets load the package. We also need to have installed the packages Pracma and R.matlab in order for this package to work.
+
+
+```{r setup}
+library(NeverConsumers)
+```
+
+Next let us set the filepath to where ever the dataset and the file of the initial values of the variables are. 
+
+```{r, message = FALSE, , warning= FALSE}
+
+
+zz         <-  read.csv("C:\\Users\\anany\\Desktop\\NeverConsumersRpkg\\R\\simulated_data.csv", header = T)# Name of the data set you will load
+
+```
+
+Let us now tell the program which are the columns for our covariates, food, energy, id's etc are in the dataset.
+
+```{r}
+
+
+X_cols          <- 2:5 # Columns where the covariates are
+Food_col        <- 6 # Column where the episodic variable is
+Energy_col      <- 7 # Column where energy (continuous) is
+ID_col          <- 1 # Column for ID
+FFQ_food_col    <- 4 # Column where the FFQ for the food is. 
+FFQ_energy_col  <- 5 # Column where the FFQ for energy is. 
+with_covariates_ind <- 3# What to include as covariates in the
+                              # ever consumer model
+                                # 0: a column of ones.
+                                # 1: a column of ones, the FFQ, and
+                                #    the indicator that the FFQ=0.
+                                # 2: a column of ones and the FFQ.
+                                # 3: a column of ones and the indicator
+                                #    that the FFQ=0.
+n_gen           <- 30# Number of realizations of usual intake to
+                                # generate. Must be a positive integer,
+mmi             <- 4# Number of recalls, integer
+
+```
+
+Let us further initialize the MCMC parameters.
+
+```{r}
+
+nMCMC           <- 50000# Number of MCMC iterations. The more the better
+nburn           <- 10000# Size of the burn-in
+nthin           <- 50# thining
+ndist           <- 200# average of the last ndist MCMC steps (after thinning)
+                              # to get the cdf of usual intake
+
+```
+
+Next let us read the initial values of the known parameters from the file. Here, we have used a matlab file but it can easily be replaced with some other file or even by directly inputting the values. 
+
+```{r, message = F, warning= FALSE}
+
+
+lambda_rec_food   <- 0.42
+lambda_rec_energy   <- 0.53
+
+
+if (length(FFQ_food_col) > 0){
+    lambda_FFQ_food   <- 0.0
+}
+if (length(FFQ_energy_col) > 0){
+    lambda_FFQ_energy   <- 0.03
+}
+
+#For initial values of beta and Sigmau, they are matrices which we read from the attached file
+beta_temp <- R.matlab::readMat("C:\\Users\\anany\\Desktop\\NeverConsumersRpkg\\R\\Output_4Recalls\\beta_postmean.mat")
+beta_temp <- beta_temp$beta.postmean
+
+Sigmau_temp_episodically <-R.matlab::readMat("C:\\Users\\anany\\Desktop\\Never-Consumers-R-package\\Output_4Recalls\\Sigmau_postmean.mat")
+Sigmau_temp_episodically <- Sigmau_temp_episodically$Sigmau.postmean
+
+```
+
+Now let us run the program and save the outputs in the nC_object. We can also see the graphs of the estimated parameters. We are running this on a very small example dataset with only 20 subjects and 4 recalls per subject, so we see that the traceplots are not very well mixed. If however we had more subjects, say around 100 then this method peforms reasonably well resulting in well mixed and convergents posteriors. 
+
+```{r, echo = T, results = F}
+start = proc.time()
+nC_object = neverConsumers(zz, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_food_col,FFQ_energy_col, with_covariates_ind,               n_gen, lambda_rec_food, lambda_rec_energy, lambda_FFQ_food, lambda_FFQ_energy, beta_temp,                                     Sigmau_temp_episodically, nthin = nthin, nMCMC = nMCMC, nburn = nburn, ndist = ndist)
+
+print(proc.time() - start)
+
+```
+
+Let us finally extract the estimated parameters from the nC_object. The program gives us the posterior means, standard deviations and confidence intervals of the parameters \alpha, \beta, \sigma_u, \sigma_e, the probability of being a never consumer, the usual intake o food, energy and the ratio of food and energy. It also computes the distribution of usual intake of food, energy and food/(energy/1000).
+  
+
+```{r}
+alpha_postmean = nC_object$alpha_postmean
+alpha_postsd = nC_object$alpha_postsd
+alpha_ci = nC_object$alpha_ci
+never_postmean = nC_object$never_postmean  
+never_postsd = nC_object$never_postsd
+never_ci = nC_object$never_ci
+beta_postmean = nC_object$beta_postmean
+beta_postsd = nC_object$beta_postsd
+beta_ci = nC_object$beta_ci
+Sigmau_postmean = nC_object$Sigmau_postmean
+Sigmau_postsd = nC_object$Sigmau_postsd
+Sigmau_ci = nC_object$Sigmau_ci
+Sigmae_postmean = nC_object$Sigmae_postmean
+Sigmae_postsd = nC_object$Sigmae_postsd
+Sigmae_ci = nC_object$Sigmae_ci
+mu_ui_food = nC_object$mu_ui_food
+sig_ui_food = nC_object$sig_ui_food
+mu_ui_energy = nC_object$mu_ui_energy
+sig_ui_energy = nC_object$sig_ui_energy
+mu_ui_ratio = nC_object$mu_ui_ratio
+sig_ui_ratio = nC_object$sig_ui_ratio
+food_distribution = nC_object$food_distribution 
+energy_distribution = nC_object$energy_distribution
+ratio_distribution = nC_object$ratio_distribution
+  
+```
+
+
+For example, the posterior mean, standard deviation and a 95% CI for the probability of being a never consumer is then estimated as the following from our simulated dataset.
+```{r}
+never_postmean
+never_postsd
+never_ci
+```
+
+Similarly the posterior mean, standard deviation and a 95% CI of our \beta is then estimated as the following:
+```{r}
+beta_postmean
+beta_postsd
+beta_ci
+```
+
+This method can be used to do an entire analysis when there is data of the required form with multiple recalls and the interest lies in estimating the percentage of never consumers of a certain food. 
+
+There is also a second dataset attached with this package, consisting of 446 male subjects with 4 recalls each and the same covariates and responses. It takes a little longer, about 10 minutes to run the function on this dataset  but since this dataset has a lot more individuals, we can see after analysis that the posteriors are well mixed and converges nicely. The only change required to implement this analysis is to change the dataset name. 
+
+```{r, echo=T, results=F}
+zz_1         <-  read.csv("C:\\Users\\anany\\Desktop\\NeverConsumersRpkg\\R\\Eats_Alcohol_05_16_2019_Males.csv", header = T)# Name of the data set you will load
+nC_object_1 = neverConsumers(zz_1, mmi, X_cols, Food_col, Energy_col, ID_col, FFQ_food_col,FFQ_energy_col, with_covariates_ind,               n_gen, lambda_rec_food, lambda_rec_energy, lambda_FFQ_food, lambda_FFQ_energy, beta_temp,                                     Sigmau_temp_episodically, nthin = nthin, nMCMC = 50000, nburn = nburn, ndist = ndist, myseed = 07101994)
+
+```
+
+Thus we see from the traceplots that the posteriors are quite well mixed. \beta_1 is a little less so since its our latent variable and we have no observations for it. But other than that we can say that our method is performing quite well. 
