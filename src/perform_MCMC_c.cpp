@@ -134,7 +134,7 @@ Rcpp::List update_Ni_with_covariates_c(const arma::cube& Xtildei,const arma::mat
   //std::cout << "aq2" << aq2 <<std::endl;
   arma::mat denom = arma::zeros(aq2.n_rows,1);
   arma::mat midterm(n,1);
-  for(int i=0;i<aq2.n_rows;i++){
+  for(arma::uword i=0;i<aq2.n_rows;i++){
     denom(i,0) = 1/(1-aq2(i,0));
     midterm(i,0) = std::pow((1 - aq1(i,0)), mmi);
     }
@@ -142,7 +142,7 @@ Rcpp::List update_Ni_with_covariates_c(const arma::cube& Xtildei,const arma::mat
   //std::cout << "CC1" << cc1 <<std::endl;
   arma::mat onemat = arma::ones(n,1);
   arma::mat ppi(cc1.n_rows, 1) ;
-  for(int i = 0; i<cc1.n_rows; i++){
+  for(arma::uword i = 0; i<cc1.n_rows; i++){
     ppi(i,0) =  1 / (1 + cc1(i, 0));
     }
   arma::mat Ni = arma::zeros(n,1);
@@ -220,6 +220,7 @@ arma::cube gen_Wtildei_1foodplusenergy_never_c(const arma::cube& Wtildei,const a
     C2      = 1 / iSigmae(varnum,varnum);
     C1      = iSigmae(varnum,varnum) * ((Xtildei.slice(varnum) * beta.col(varnum)) + Utildei.col(varnum));
     for(int jj = 0; jj< Xtildei.n_slices; jj++){
+      
       if(abs(jj - varnum) > 0) {
         arma::mat w = Wtildei.slice(kk);
 
@@ -286,9 +287,11 @@ double updated_parameter_r_never_c(const double r, const double theta, const dou
   // theta = current value
   // s22 = current value
   // s33 = current value
-  double rcurr, rcand, ss, ss1, rnew, a, b, c, d, i;
+  double rcurr, rcand, ss, ss1, rnew, a, b, c, d,i;
 
   rcurr = r;
+  rcand = 0.0;
+  i = 0.0;
   arma::vec  rpossible = arma::linspace(-0.99, 0.99, 41);
   double  spacing   = rpossible(2) - rpossible(1);
   // if(abs(round(r,2)) <= 0.99 ){
@@ -448,6 +451,7 @@ double updated_parameter_theta_never_c(const double r, const double theta, const
   // # s22 = current value
   // # s33 = current value
   double thetamin, thetamax,spacing, thetacurr, thetacand, a, b, c, d, ss;
+  thetacand = 0.0;
   arma::vec thetapossible = 3.141593 * arma::linspace(-0.99, 0.99, 41);
   double theta_min = arma::min(thetapossible);
   double theta_max = arma::max(thetapossible);
@@ -865,8 +869,8 @@ arma::mat ginverse_c(const arma::mat& z,const double lambda){
   if (lambda > 0){
     arma::mat w = one + (lambda * z);
 
-    for(int i=0; i < w.n_rows; i++){
-      for(int j =0; j< w.n_cols; j++){
+    for(arma::uword i=0; i < w.n_rows; i++){
+      for(arma::uword j =0; j< w.n_cols; j++){
         if(w(i,j) < 0){
           w(i,j) = 0;
         }
@@ -969,7 +973,7 @@ for(int jjMCMC = 0; jjMCMC< nMCMC; jjMCMC ++){
  arma::vec ppi = p.col(0);
 
  arma::vec    isnever(Ni.n_elem);  // Indicator of a never-consumer
- for(int i = 0; i < Ni.n_elem; i ++){
+ for(arma::uword i = 0; i < Ni.n_elem; i ++){
    if(Ni(i)< 0){
      isnever(i) = 1;
    }else{
@@ -983,7 +987,7 @@ for(int jjMCMC = 0; jjMCMC< nMCMC; jjMCMC ++){
 // // # * cc1) and variance cc2.
 // // ###########################################################################
     arma::mat   xx     = Xtildei.slice(1);
-    double mmnn        =  xx.n_cols;
+    //double mmnn        =  xx.n_cols;
     arma::mat  cc1     = (inv(prior_alpha_cov)*prior_alpha_mean) + GGalpha.t()*Ni;
     arma::mat  cc2     = inv(GGalpha.t()*GGalpha + inv(prior_alpha_cov));
     arma::mat  mujj    = cc2 * cc1;
@@ -1123,7 +1127,7 @@ arma::vec ut = arma::regspace(vt, nthin, nMCMC);
 // std::cout << "vt = " << vt <<std::endl;
 
 int flag = 0;
-for(int i = 0; i < ut.n_elem; i++){
+for(arma::uword i = 0; i < ut.n_elem; i++){
   if(ut(i) == jjMCMC)
     flag = flag + 1;
   }
@@ -1131,7 +1135,7 @@ for(int i = 0; i < ut.n_elem; i++){
 if(flag > 0){
  //std::cout << "Ni = " << Ni <<std::endl;
   arma::vec    uuindex(Ni.n_elem);  // Indicator of a never-consumer
-  for(int i = 0; i < Ni.n_elem; i ++){
+  for(arma::uword i = 0; i < Ni.n_elem; i ++){
     if(Ni(i)> 0){
       uuindex(i) = 1.0;
     }else{
@@ -1158,8 +1162,8 @@ if(flag > 0){
   // std::cout << backtransform_c(lambda_rec_food, temp_mat.rows(row_vec) , beta.col(1), std::sqrt(Sigmae(1,1)),
   //                           mumu, sigsig, temp_vec, nindex) << std::endl;
   // 
-  for(int i=0; i < temp_1.n_rows; i++){
-    for(int j =0; j< temp_1.n_cols; j++){
+  for(arma::uword i=0; i < temp_1.n_rows; i++){
+    for(arma::uword j =0; j< temp_1.n_cols; j++){
       if(temp_1(i,j) < a0_food){
         temp_1(i,j) = a0_food;
       }
@@ -1181,8 +1185,8 @@ if(flag > 0){
  temp_2 = backtransform_c(lambda_rec_food, temp_mat.rows(row_vec) , beta.col(2), std::sqrt(Sigmae(2,2)),
                           mumu, sigsig, temp_vec, nindex);
  
- for(int i=0; i < temp_2.n_rows; i++){
-   for(int j =0; j< temp_2.n_cols; j++){
+ for(arma::uword i=0; i < temp_2.n_rows; i++){
+   for(arma::uword j =0; j< temp_2.n_cols; j++){
      if(temp_2(i,j) < a0_energy){
        temp_2(i,j) = a0_energy;
      }
