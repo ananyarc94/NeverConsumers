@@ -1,11 +1,19 @@
 Package: NeverConsumersR
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
+Title:Identify Never-Consumers in Zero Inflated Poisson Models
+Version: 0.0.99
 Date: 2021-03-06
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
-Imports: Rcpp (>= 1.0.6)
-LinkingTo: Rcpp, RcppArmadillo
+Author@R: person(given = "Ananya", family = "Roy Chowdhury", role = c("aut, cre, trl")), email = "ananya.rc94@gmail.com")
+Author: Ananya Roy Chowdhury [aut, cre, trl]
+Maintainer: Ananya Roy Chowdhury <ananya.rc94@gmail.com>
+Description: A function to estimate percentage of never-consumers in the context of nutrition. 
+License: GPL (>= 2)
+Imports: Rcpp (>= 1.0.6), pracma
+Suggests: 
+    knitr,
+    rmarkdown
+LinkingTo: Rcpp, RcppArmadillo, stats, pracma, R.matlab
+RoxygenNote: 7.1.1
+VignetteBuilder: kniter
+Depends: R(>= 2.10)
+Encoding: UTF-8
